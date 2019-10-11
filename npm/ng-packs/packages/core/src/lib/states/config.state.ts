@@ -20,8 +20,8 @@ export class ConfigState {
   }
 
   @Selector()
-  static getApplicationInfo(state: Config.State) {
-    return state.environment.application || {};
+  static getApplicationInfo(state: Config.State): Config.Application {
+    return state.environment.application || ({} as Config.Application);
   }
 
   static getOne(key: string) {
@@ -60,6 +60,24 @@ export class ConfigState {
     return selector;
   }
 
+  static getRoute(path?: string, name?: string) {
+    const selector = createSelector(
+      [ConfigState],
+      function(state: Config.State) {
+        const { flattedRoutes } = state;
+        return (flattedRoutes as ABP.FullRoute[]).find(route => {
+          if (path && route.path === path) {
+            return route;
+          } else if (name && route.name === name) {
+            return route;
+          }
+        });
+      },
+    );
+
+    return selector;
+  }
+
   static getApiUrl(key?: string) {
     const selector = createSelector(
       [ConfigState],
@@ -82,29 +100,12 @@ export class ConfigState {
     return selector;
   }
 
-  static getGrantedPolicy(condition: string = '') {
-    const keys = condition
-      .replace(/\(|\)|\!|\s/g, '')
-      .split(/\|\||&&/)
-      .filter(key => key);
-
+  static getGrantedPolicy(key: string) {
     const selector = createSelector(
       [ConfigState],
       function(state: Config.State): boolean {
-        if (!keys.length) return true;
-
-        const getPolicy = key => snq(() => state.auth.grantedPolicies[key], false);
-        if (keys.length > 1) {
-          keys.forEach(key => {
-            const value = getPolicy(key);
-            condition = condition.replace(key, value);
-          });
-
-          // tslint:disable-next-line: no-eval
-          return eval(`!!${condition}`);
-        }
-
-        return getPolicy(condition);
+        if (!key) return true;
+        return snq(() => state.auth.grantedPolicies[key], false);
       },
     );
 
@@ -137,7 +138,7 @@ export class ConfigState {
           keys[0] = snq(() => defaultResourceName);
         }
 
-        let copy = keys.reduce((acc, val) => {
+        let copy = (keys as any).reduce((acc, val) => {
           if (acc) {
             return acc[val];
           }
@@ -169,11 +170,15 @@ export class ConfigState {
           ...configuration,
         }),
       ),
-      switchMap(configuration =>
-        this.store.selectSnapshot(SessionState.getLanguage)
-          ? of(null)
-          : dispatch(new SetLanguage(snq(() => configuration.setting.values['Abp.Localization.DefaultLanguage']))),
-      ),
+      switchMap(configuration => {
+        let defaultLang: string = configuration.setting.values['Abp.Localization.DefaultLanguage'];
+
+        if (defaultLang.includes(';')) {
+          defaultLang = defaultLang.split(';')[0];
+        }
+
+        return this.store.selectSnapshot(SessionState.getLanguage) ? of(null) : dispatch(new SetLanguage(defaultLang));
+      }),
     );
   }
 

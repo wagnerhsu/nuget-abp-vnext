@@ -10,6 +10,7 @@ export class AbstractToaster<T = Toaster.Options> {
   sticky: boolean = false;
 
   constructor(protected messageService: MessageService) {}
+
   info(message: string, title: string, options?: T): Observable<Toaster.Status> {
     return this.show(message, title, 'info', options);
   }
@@ -31,8 +32,8 @@ export class AbstractToaster<T = Toaster.Options> {
 
     this.messageService.add({
       severity,
-      detail: message,
-      summary: title,
+      detail: message || '',
+      summary: title || '',
       ...options,
       key: this.key,
       ...(typeof (options || ({} as any)).sticky === 'undefined' && { sticky: this.sticky }),

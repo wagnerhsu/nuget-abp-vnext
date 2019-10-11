@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Volo.Abp.Cli.Commands;
 using Volo.Abp.Cli.Licensing;
 using Volo.Abp.Cli.ProjectBuilding.Analyticses;
 using Volo.Abp.Cli.ProjectBuilding.Building;
@@ -52,10 +53,15 @@ namespace Volo.Abp.Cli.ProjectBuilding
                 args.Version
             );
 
-            var apiKey = await ApiKeyService.GetApiKeyOrNullAsync();
-            if (apiKey != null)
+            var apiKeyResult = await ApiKeyService.GetApiKeyOrNullAsync();
+            if (apiKeyResult?.ApiKey != null)
             {
-                args.ExtraProperties["api-key"] = apiKey;
+                args.ExtraProperties["api-key"] = apiKeyResult.ApiKey;
+            }
+
+            if (apiKeyResult?.LicenseCode != null)
+            {
+                args.ExtraProperties["license-code"] = apiKeyResult.LicenseCode;
             }
 
             var context = new ProjectBuildContext(
@@ -68,15 +74,21 @@ namespace Volo.Abp.Cli.ProjectBuilding
 
             if (!templateInfo.DocumentUrl.IsNullOrEmpty())
             {
-                Logger.LogInformation("Check the documentation of this template: " + templateInfo.DocumentUrl);
+                Logger.LogInformation("Check out the documents at " + templateInfo.DocumentUrl);
             }
 
             // Exclude unwanted or known options.
             var options = args.ExtraProperties
-                .Where(x => x.Key != CliConsts.Command)
-                .Where(x => x.Key != "tiered")
-                .Where(x => x.Key != "database-provider" && x.Key != "d")
-                .Where(x => x.Key != "output-folder" && x.Key != "o")
+                .Where(x => !x.Key.Equals(CliConsts.Command, StringComparison.InvariantCultureIgnoreCase))
+                .Where(x => !x.Key.Equals("tiered", StringComparison.InvariantCultureIgnoreCase))
+                .Where(x => !x.Key.Equals(NewCommand.Options.DatabaseProvider.Long, StringComparison.InvariantCultureIgnoreCase) && 
+                            !x.Key.Equals(NewCommand.Options.DatabaseProvider.Short, StringComparison.InvariantCultureIgnoreCase))
+                .Where(x => !x.Key.Equals(NewCommand.Options.OutputFolder.Long, StringComparison.InvariantCultureIgnoreCase) &&
+                            !x.Key.Equals(NewCommand.Options.OutputFolder.Short, StringComparison.InvariantCultureIgnoreCase))
+                .Where(x => !x.Key.Equals(NewCommand.Options.UiFramework.Long, StringComparison.InvariantCultureIgnoreCase) &&
+                            !x.Key.Equals(NewCommand.Options.UiFramework.Short, StringComparison.InvariantCultureIgnoreCase))
+                .Where(x => !x.Key.Equals(NewCommand.Options.Version.Long, StringComparison.InvariantCultureIgnoreCase) &&
+                            !x.Key.Equals(NewCommand.Options.Version.Short, StringComparison.InvariantCultureIgnoreCase))
                 .Select(x => x.Key).ToList();
 
             await CliAnalyticsCollect.CollectAsync(new CliAnalyticsCollectInputDto
@@ -85,6 +97,7 @@ namespace Volo.Abp.Cli.ProjectBuilding
                 Command = args.ExtraProperties.ContainsKey(CliConsts.Command) ? args.ExtraProperties[CliConsts.Command] : "",
                 DatabaseProvider = args.DatabaseProvider.ToProviderName(),
                 IsTiered = args.ExtraProperties.ContainsKey("tiered"),
+                UiFramework = args.UiFramework.ToFrameworkName(),
                 Options = JsonSerializer.Serialize(options),
                 ProjectName = args.SolutionName.FullName,
                 TemplateName = args.TemplateName,

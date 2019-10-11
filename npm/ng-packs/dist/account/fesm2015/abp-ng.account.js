@@ -1,17 +1,17 @@
 import { ConfigState, GetAppConfiguration, RestService, DynamicLayoutComponent, SessionState, SetTenant, CoreModule } from '@abp/ng.core';
+import { ToasterService, ThemeSharedModule } from '@abp/ng.theme.shared';
 import { Component, Optional, Inject, Injectable, ɵɵdefineInjectable, ɵɵinject, NgModule, InjectionToken } from '@angular/core';
+import { NgbDropdownModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgxValidateCoreModule } from '@ngx-validate/core';
+import { TableModule } from 'primeng/table';
 import { RouterModule } from '@angular/router';
 import { Validators, FormBuilder } from '@angular/forms';
 import { Navigate } from '@ngxs/router-plugin';
 import { Store } from '@ngxs/store';
 import { OAuthService } from 'angular-oauth2-oidc';
 import { from, throwError } from 'rxjs';
-import { ToasterService, ThemeSharedModule } from '@abp/ng.theme.shared';
 import { switchMap, tap, catchError, finalize, take } from 'rxjs/operators';
 import snq from 'snq';
-import { TableModule } from 'primeng/table';
-import { NgbDropdownModule } from '@ng-bootstrap/ng-bootstrap';
-import { NgxValidateCoreModule } from '@ngx-validate/core';
 
 /**
  * @fileoverview added by tsickle
@@ -46,7 +46,7 @@ class LoginComponent {
     onSubmit() {
         if (this.form.invalid)
             return;
-        this.oauthService.setStorage(this.form.value.remember ? localStorage : sessionStorage);
+        // this.oauthService.setStorage(this.form.value.remember ? localStorage : sessionStorage);
         this.inProgress = true;
         from(this.oauthService.fetchTokenUsingPasswordFlow(this.form.get('username').value, this.form.get('password').value))
             .pipe(switchMap((/**
@@ -148,7 +148,7 @@ class AccountService {
         /** @type {?} */
         const request = {
             method: 'GET',
-            url: `/api/abp/multi-tenancy/find-tenant/${tenantName}`,
+            url: `/api/abp/multi-tenancy/tenants/by-name/${tenantName}`,
         };
         return this.rest.request(request);
     }
@@ -163,7 +163,7 @@ class AccountService {
             url: `/api/account/register`,
             body,
         };
-        return this.rest.request(request, { throwErr: true });
+        return this.rest.request(request, { skipHandleError: true });
     }
 }
 AccountService.decorators = [
@@ -223,7 +223,7 @@ class RegisterComponent {
             userName: this.form.get('username').value,
             password: this.form.get('password').value,
             emailAddress: this.form.get('email').value,
-            appName: 'angular',
+            appName: 'Angular',
         }));
         this.accountService
             .register(newUser)
@@ -456,23 +456,6 @@ const ACCOUNT_OPTIONS = new InjectionToken('ACCOUNT_OPTIONS');
  * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 class AccountModule {
-    /**
-     * @param {?=} options
-     * @return {?}
-     */
-    static forRoot(options = (/** @type {?} */ ({}))) {
-        return {
-            ngModule: AccountModule,
-            providers: [
-                { provide: ACCOUNT_OPTIONS, useValue: options },
-                {
-                    provide: 'ACCOUNT_OPTIONS',
-                    useFactory: optionsFactory,
-                    deps: [ACCOUNT_OPTIONS],
-                },
-            ],
-        };
-    }
 }
 AccountModule.decorators = [
     { type: NgModule, args: [{
@@ -481,6 +464,20 @@ AccountModule.decorators = [
                 exports: [],
             },] }
 ];
+/**
+ * @param {?=} options
+ * @return {?}
+ */
+function AccountProviders(options = (/** @type {?} */ ({}))) {
+    return [
+        { provide: ACCOUNT_OPTIONS, useValue: options },
+        {
+            provide: 'ACCOUNT_OPTIONS',
+            useFactory: optionsFactory,
+            deps: [ACCOUNT_OPTIONS],
+        },
+    ];
+}
 
 /**
  * @fileoverview added by tsickle
@@ -492,15 +489,17 @@ AccountModule.decorators = [
  * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 /** @type {?} */
-const ACCOUNT_ROUTES = (/** @type {?} */ ([
-    {
-        name: 'Account',
-        path: 'account',
-        invisible: true,
-        layout: "application" /* application */,
-        children: [{ path: 'login', name: 'Login', order: 1 }, { path: 'register', name: 'Register', order: 2 }],
-    },
-]));
+const ACCOUNT_ROUTES = {
+    routes: (/** @type {?} */ ([
+        {
+            name: 'Account',
+            path: 'account',
+            invisible: true,
+            layout: "application" /* application */,
+            children: [{ path: 'login', name: 'Login', order: 1 }, { path: 'register', name: 'Register', order: 2 }],
+        },
+    ])),
+};
 
 /**
  * @fileoverview added by tsickle
@@ -615,5 +614,5 @@ if (false) {
  * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
  */
 
-export { ACCOUNT_OPTIONS, ACCOUNT_ROUTES, AccountModule, LoginComponent, RegisterComponent, optionsFactory, LoginComponent as ɵa, RegisterComponent as ɵc, AccountService as ɵd, TenantBoxComponent as ɵe, AccountRoutingModule as ɵf, optionsFactory as ɵg, ACCOUNT_OPTIONS as ɵh };
+export { ACCOUNT_OPTIONS, ACCOUNT_ROUTES, AccountModule, AccountProviders, LoginComponent, RegisterComponent, optionsFactory, LoginComponent as ɵa, RegisterComponent as ɵc, AccountService as ɵd, TenantBoxComponent as ɵe, AccountRoutingModule as ɵf, optionsFactory as ɵg, ACCOUNT_OPTIONS as ɵh };
 //# sourceMappingURL=abp-ng.account.js.map

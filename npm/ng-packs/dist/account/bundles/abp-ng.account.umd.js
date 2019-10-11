@@ -1,8 +1,8 @@
 (function (global, factory) {
-    typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('@abp/ng.core'), require('@angular/core'), require('@angular/router'), require('@angular/forms'), require('@ngxs/router-plugin'), require('@ngxs/store'), require('angular-oauth2-oidc'), require('rxjs'), require('@abp/ng.theme.shared'), require('rxjs/operators'), require('snq'), require('primeng/table'), require('@ng-bootstrap/ng-bootstrap'), require('@ngx-validate/core')) :
-    typeof define === 'function' && define.amd ? define('@abp/ng.account', ['exports', '@abp/ng.core', '@angular/core', '@angular/router', '@angular/forms', '@ngxs/router-plugin', '@ngxs/store', 'angular-oauth2-oidc', 'rxjs', '@abp/ng.theme.shared', 'rxjs/operators', 'snq', 'primeng/table', '@ng-bootstrap/ng-bootstrap', '@ngx-validate/core'], factory) :
-    (global = global || self, factory((global.abp = global.abp || {}, global.abp.ng = global.abp.ng || {}, global.abp.ng.account = {}), global.ng_core, global.ng.core, global.ng.router, global.ng.forms, global.routerPlugin, global.store, global.angularOauth2Oidc, global.rxjs, global.ng_theme_shared, global.rxjs.operators, global.snq, global.table, global.ngBootstrap, global.core$1));
-}(this, function (exports, ng_core, core, router, forms, routerPlugin, store, angularOauth2Oidc, rxjs, ng_theme_shared, operators, snq, table, ngBootstrap, core$1) { 'use strict';
+    typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('@abp/ng.core'), require('@abp/ng.theme.shared'), require('@angular/core'), require('@ng-bootstrap/ng-bootstrap'), require('@ngx-validate/core'), require('primeng/table'), require('@angular/router'), require('@angular/forms'), require('@ngxs/router-plugin'), require('@ngxs/store'), require('angular-oauth2-oidc'), require('rxjs'), require('rxjs/operators'), require('snq')) :
+    typeof define === 'function' && define.amd ? define('@abp/ng.account', ['exports', '@abp/ng.core', '@abp/ng.theme.shared', '@angular/core', '@ng-bootstrap/ng-bootstrap', '@ngx-validate/core', 'primeng/table', '@angular/router', '@angular/forms', '@ngxs/router-plugin', '@ngxs/store', 'angular-oauth2-oidc', 'rxjs', 'rxjs/operators', 'snq'], factory) :
+    (global = global || self, factory((global.abp = global.abp || {}, global.abp.ng = global.abp.ng || {}, global.abp.ng.account = {}), global.ng_core, global.ng_theme_shared, global.ng.core, global.ngBootstrap, global.core$1, global.table, global.ng.router, global.ng.forms, global.routerPlugin, global.store, global.angularOauth2Oidc, global.rxjs, global.rxjs.operators, global.snq));
+}(this, function (exports, ng_core, ng_theme_shared, core, ngBootstrap, core$1, table, router, forms, routerPlugin, store, angularOauth2Oidc, rxjs, operators, snq) { 'use strict';
 
     snq = snq && snq.hasOwnProperty('default') ? snq['default'] : snq;
 
@@ -233,7 +233,7 @@
             var _this = this;
             if (this.form.invalid)
                 return;
-            this.oauthService.setStorage(this.form.value.remember ? localStorage : sessionStorage);
+            // this.oauthService.setStorage(this.form.value.remember ? localStorage : sessionStorage);
             this.inProgress = true;
             rxjs.from(this.oauthService.fetchTokenUsingPasswordFlow(this.form.get('username').value, this.form.get('password').value))
                 .pipe(operators.switchMap((/**
@@ -337,7 +337,7 @@
             /** @type {?} */
             var request = {
                 method: 'GET',
-                url: "/api/abp/multi-tenancy/find-tenant/" + tenantName,
+                url: "/api/abp/multi-tenancy/tenants/by-name/" + tenantName,
             };
             return this.rest.request(request);
         };
@@ -356,7 +356,7 @@
                 url: "/api/account/register",
                 body: body,
             };
-            return this.rest.request(request, { throwErr: true });
+            return this.rest.request(request, { skipHandleError: true });
         };
         AccountService.decorators = [
             { type: core.Injectable, args: [{
@@ -414,7 +414,7 @@
                 userName: this.form.get('username').value,
                 password: this.form.get('password').value,
                 emailAddress: this.form.get('email').value,
-                appName: 'angular',
+                appName: 'Angular',
             }));
             this.accountService
                 .register(newUser)
@@ -660,28 +660,6 @@
     var AccountModule = /** @class */ (function () {
         function AccountModule() {
         }
-        /**
-         * @param {?=} options
-         * @return {?}
-         */
-        AccountModule.forRoot = /**
-         * @param {?=} options
-         * @return {?}
-         */
-        function (options) {
-            if (options === void 0) { options = (/** @type {?} */ ({})); }
-            return {
-                ngModule: AccountModule,
-                providers: [
-                    { provide: ACCOUNT_OPTIONS, useValue: options },
-                    {
-                        provide: 'ACCOUNT_OPTIONS',
-                        useFactory: optionsFactory,
-                        deps: [ACCOUNT_OPTIONS],
-                    },
-                ],
-            };
-        };
         AccountModule.decorators = [
             { type: core.NgModule, args: [{
                         declarations: [LoginComponent, RegisterComponent, TenantBoxComponent],
@@ -691,6 +669,21 @@
         ];
         return AccountModule;
     }());
+    /**
+     * @param {?=} options
+     * @return {?}
+     */
+    function AccountProviders(options) {
+        if (options === void 0) { options = (/** @type {?} */ ({})); }
+        return [
+            { provide: ACCOUNT_OPTIONS, useValue: options },
+            {
+                provide: 'ACCOUNT_OPTIONS',
+                useFactory: optionsFactory,
+                deps: [ACCOUNT_OPTIONS],
+            },
+        ];
+    }
 
     /**
      * @fileoverview added by tsickle
@@ -702,15 +695,17 @@
      * @suppress {checkTypes,extraRequire,missingOverride,missingReturn,unusedPrivateMembers,uselessCode} checked by tsc
      */
     /** @type {?} */
-    var ACCOUNT_ROUTES = (/** @type {?} */ ([
-        {
-            name: 'Account',
-            path: 'account',
-            invisible: true,
-            layout: "application" /* application */,
-            children: [{ path: 'login', name: 'Login', order: 1 }, { path: 'register', name: 'Register', order: 2 }],
-        },
-    ]));
+    var ACCOUNT_ROUTES = {
+        routes: (/** @type {?} */ ([
+            {
+                name: 'Account',
+                path: 'account',
+                invisible: true,
+                layout: "application" /* application */,
+                children: [{ path: 'login', name: 'Login', order: 1 }, { path: 'register', name: 'Register', order: 2 }],
+            },
+        ])),
+    };
 
     /**
      * @fileoverview added by tsickle
@@ -813,6 +808,7 @@
     exports.ACCOUNT_OPTIONS = ACCOUNT_OPTIONS;
     exports.ACCOUNT_ROUTES = ACCOUNT_ROUTES;
     exports.AccountModule = AccountModule;
+    exports.AccountProviders = AccountProviders;
     exports.LoginComponent = LoginComponent;
     exports.RegisterComponent = RegisterComponent;
     exports.optionsFactory = optionsFactory;

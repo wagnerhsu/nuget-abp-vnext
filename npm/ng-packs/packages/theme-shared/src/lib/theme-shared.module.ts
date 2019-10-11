@@ -1,23 +1,29 @@
 import { CoreModule, LazyLoadService } from '@abp/ng.core';
 import { APP_INITIALIZER, Injector, ModuleWithProviders, NgModule } from '@angular/core';
-import { NgbModalModule } from '@ng-bootstrap/ng-bootstrap';
-import { NgxValidateCoreModule } from '@ngx-validate/core';
 import { MessageService } from 'primeng/components/common/messageservice';
 import { ToastModule } from 'primeng/toast';
 import { forkJoin } from 'rxjs';
 import { take } from 'rxjs/operators';
+import { BreadcrumbComponent } from './components/breadcrumb/breadcrumb.component';
+import { ButtonComponent } from './components/button/button.component';
+import { ChangePasswordComponent } from './components/change-password/change-password.component';
+import { ChartComponent } from './components/chart/chart.component';
 import { ConfirmationComponent } from './components/confirmation/confirmation.component';
 import { ErrorComponent } from './components/errors/error.component';
 import { LoaderBarComponent } from './components/loader-bar/loader-bar.component';
 import { ModalComponent } from './components/modal/modal.component';
+import { ProfileComponent } from './components/profile/profile.component';
 import { ToastComponent } from './components/toast/toast.component';
 import styles from './contants/styles';
 import { ErrorHandler } from './handlers/error.handler';
-import { ButtonComponent } from './components/button/button.component';
-import { ValidationErrorComponent } from './components/errors/validation-error.component';
+import { chartJsLoaded$ } from './utils/widget-utils';
+import { TableEmptyMessageComponent } from './components/table-empty-message/table-empty-message.component';
+import { NgxValidateCoreModule } from '@ngx-validate/core';
 
 export function appendScript(injector: Injector) {
   const fn = function() {
+    import('chart.js').then(() => chartJsLoaded$.next(true));
+
     const lazyLoadService: LazyLoadService = injector.get(LazyLoadService);
 
     return forkJoin(
@@ -35,35 +41,33 @@ export function appendScript(injector: Injector) {
 }
 
 @NgModule({
-  imports: [
-    CoreModule,
-    ToastModule,
-    NgbModalModule,
-    NgxValidateCoreModule.forRoot({
-      targetSelector: '.form-group',
-      blueprints: {
-        email: `AbpAccount::ThisFieldIsNotAValidEmailAddress.`,
-        max: `AbpAccount::ThisFieldMustBeAStringWithAMaximumLengthOf{1}[{{ max }}]`,
-        maxlength: `AbpAccount::ThisFieldMustBeAStringWithAMaximumLengthOf{1}[{{ requiredLength }}]`,
-        min: `AbpAccount::ThisFieldMustBeAStringWithAMinimumLengthOf{1}AndAMaximumLengthOf{0}[{{ min }},{{ max }}]`,
-        minlength: `AbpAccount::ThisFieldMustBeAStringWithAMinimumLengthOf{1}AndAMaximumLengthOf{0}[{{ min }},{{ max }}]`,
-        required: `AbpAccount::ThisFieldIsRequired.`,
-        passwordMismatch: `AbpIdentity::Identity.PasswordConfirmationFailed`,
-      },
-      errorTemplate: ValidationErrorComponent,
-    }),
-  ],
+  imports: [CoreModule, ToastModule, NgxValidateCoreModule],
   declarations: [
+    BreadcrumbComponent,
     ButtonComponent,
+    ChangePasswordComponent,
+    ChartComponent,
     ConfirmationComponent,
-    ToastComponent,
-    ModalComponent,
     ErrorComponent,
     LoaderBarComponent,
-    ValidationErrorComponent,
+    ModalComponent,
+    ProfileComponent,
+    TableEmptyMessageComponent,
+    ToastComponent,
   ],
-  exports: [NgbModalModule, ButtonComponent, ConfirmationComponent, ToastComponent, ModalComponent, LoaderBarComponent],
-  entryComponents: [ErrorComponent, ValidationErrorComponent],
+  exports: [
+    BreadcrumbComponent,
+    ButtonComponent,
+    ChangePasswordComponent,
+    ChartComponent,
+    ConfirmationComponent,
+    LoaderBarComponent,
+    ModalComponent,
+    ProfileComponent,
+    TableEmptyMessageComponent,
+    ToastComponent,
+  ],
+  entryComponents: [ErrorComponent],
 })
 export class ThemeSharedModule {
   static forRoot(): ModuleWithProviders {

@@ -23,10 +23,13 @@ export declare class TenantsComponent {
     defaultConnectionString: string;
     isModalVisible: boolean;
     selectedModalContent: SelectedModalContent;
+    visibleFeatures: boolean;
+    providerKey: string;
     _useSharedDatabase: boolean;
     pageQuery: ABP.PageQueryParams;
     loading: boolean;
     modalBusy: boolean;
+    sortOrder: string;
     readonly useSharedDatabase: boolean;
     readonly connectionString: string;
     tenantModalTemplate: TemplateRef<any>;
@@ -45,5 +48,6 @@ export declare class TenantsComponent {
     delete(id: string, name: string): void;
     onPageChange(data: any): void;
     get(): void;
+    changeSortOrder(): void;
 }
 export {};
