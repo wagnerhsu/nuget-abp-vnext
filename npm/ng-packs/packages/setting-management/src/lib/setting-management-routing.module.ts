@@ -1,15 +1,32 @@
-import { DynamicLayoutComponent } from '@abp/ng.core';
+import {
+  DynamicLayoutComponent,
+  ReplaceableComponents,
+  ReplaceableRouteContainerComponent,
+  AuthGuard,
+} from '@abp/ng.core';
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { SETTING_MANAGEMENT_ROUTES } from './constants/routes';
-import { SettingLayoutComponent } from './components/setting-layout.component';
+import { SettingManagementComponent } from './components/setting-management.component';
+import { eSettingManagementComponents } from './enums/components';
 
 const routes: Routes = [
   {
-    path: 'setting-management',
+    path: '',
     component: DynamicLayoutComponent,
-    children: [{ path: '', component: SettingLayoutComponent }],
-    data: { routes: SETTING_MANAGEMENT_ROUTES, settings: [] },
+    canActivate: [AuthGuard],
+    children: [
+      {
+        path: '',
+        component: ReplaceableRouteContainerComponent,
+        data: {
+          requiredPolicy: 'AbpAccount.SettingManagement',
+          replaceableComponent: {
+            key: eSettingManagementComponents.SettingManagement,
+            defaultComponent: SettingManagementComponent,
+          } as ReplaceableComponents.RouteData,
+        },
+      },
+    ],
   },
 ];
 

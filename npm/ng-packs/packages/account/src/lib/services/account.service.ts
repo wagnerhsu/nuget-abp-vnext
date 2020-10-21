@@ -7,6 +7,8 @@ import { RegisterResponse, RegisterRequest, TenantIdResponse } from '../models';
   providedIn: 'root',
 })
 export class AccountService {
+  apiName = 'AbpAccount';
+
   constructor(private rest: RestService) {}
 
   findTenant(tenantName: string): Observable<TenantIdResponse> {
@@ -15,16 +17,19 @@ export class AccountService {
       url: `/api/abp/multi-tenancy/tenants/by-name/${tenantName}`,
     };
 
-    return this.rest.request<null, TenantIdResponse>(request);
+    return this.rest.request<null, TenantIdResponse>(request, { apiName: this.apiName });
   }
 
   register(body: RegisterRequest): Observable<RegisterResponse> {
     const request: Rest.Request<RegisterRequest> = {
       method: 'POST',
-      url: `/api/account/register`,
+      url: '/api/account/register',
       body,
     };
 
-    return this.rest.request<RegisterRequest, RegisterResponse>(request, { skipHandleError: true });
+    return this.rest.request<RegisterRequest, RegisterResponse>(request, {
+      skipHandleError: true,
+      apiName: this.apiName,
+    });
   }
 }

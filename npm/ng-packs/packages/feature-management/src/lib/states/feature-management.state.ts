@@ -3,15 +3,20 @@ import { tap } from 'rxjs/operators';
 import { GetFeatures, UpdateFeatures } from '../actions/feature-management.actions';
 import { FeatureManagement } from '../models/feature-management';
 import { FeatureManagementService } from '../services/feature-management.service';
+import { Injectable } from '@angular/core';
 
+/**
+ * @deprecated To be deleted in v4.0.
+ */
 @State<FeatureManagement.State>({
   name: 'FeatureManagementState',
   defaults: { features: {} } as FeatureManagement.State,
 })
+@Injectable()
 export class FeatureManagementState {
   @Selector()
   static getFeatures({ features }: FeatureManagement.State) {
-    return features;
+    return features || [];
   }
 
   constructor(private featureManagementService: FeatureManagementService) {}
@@ -19,7 +24,7 @@ export class FeatureManagementState {
   @Action(GetFeatures)
   getFeatures({ patchState }: StateContext<FeatureManagement.State>, { payload }: GetFeatures) {
     return this.featureManagementService.getFeatures(payload).pipe(
-      tap(({ features }) =>
+      tap(({ features = [] }) =>
         patchState({
           features,
         }),

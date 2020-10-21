@@ -1,14 +1,30 @@
-import { CoreModule } from '@abp/ng.core';
+import { CoreModule, LazyModuleFactory } from '@abp/ng.core';
 import { ThemeSharedModule } from '@abp/ng.theme.shared';
-import { NgModule } from '@angular/core';
-import { SettingLayoutComponent } from './components/setting-layout.component';
+import { ModuleWithProviders, NgModule, NgModuleFactory } from '@angular/core';
+import { NgxsModule } from '@ngxs/store';
+import { SettingManagementComponent } from './components/setting-management.component';
 import { SettingManagementRoutingModule } from './setting-management-routing.module';
-
-export const SETTING_LAYOUT = SettingLayoutComponent;
+import { SettingManagementState } from './states/setting-management.state';
 
 @NgModule({
-  declarations: [SETTING_LAYOUT],
-  imports: [SettingManagementRoutingModule, CoreModule, ThemeSharedModule],
-  entryComponents: [SETTING_LAYOUT],
+  declarations: [SettingManagementComponent],
+  exports: [SettingManagementComponent],
+  imports: [
+    SettingManagementRoutingModule,
+    CoreModule,
+    ThemeSharedModule,
+    NgxsModule.forFeature([SettingManagementState]),
+  ],
 })
-export class SettingManagementModule {}
+export class SettingManagementModule {
+  static forChild(): ModuleWithProviders<SettingManagementModule> {
+    return {
+      ngModule: SettingManagementModule,
+      providers: [],
+    };
+  }
+
+  static forLazy(): NgModuleFactory<SettingManagementModule> {
+    return new LazyModuleFactory(SettingManagementModule.forChild());
+  }
+}

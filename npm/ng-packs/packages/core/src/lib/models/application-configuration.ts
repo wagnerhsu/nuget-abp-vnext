@@ -1,15 +1,19 @@
+import { ABP } from './common';
+
 export namespace ApplicationConfiguration {
   export interface Response {
     localization: Localization;
     auth: Auth;
-    setting: Setting;
+    setting: Value;
     currentUser: CurrentUser;
-    features: Features;
+    features: Value;
   }
 
   export interface Localization {
-    values: LocalizationValue;
+    currentCulture: CurrentCulture;
+    defaultResourceName: string;
     languages: Language[];
+    values: LocalizationValue;
   }
 
   export interface LocalizationValue {
@@ -23,6 +27,27 @@ export namespace ApplicationConfiguration {
     flagIcon: string;
   }
 
+  export interface CurrentCulture {
+    cultureName: string;
+    dateTimeFormat: DateTimeFormat;
+    displayName: string;
+    englishName: string;
+    isRightToLeft: boolean;
+    name: string;
+    nativeName: string;
+    threeLetterIsoLanguageName: string;
+    twoLetterIsoLanguageName: string;
+  }
+
+  export interface DateTimeFormat {
+    calendarAlgorithmType: string;
+    dateSeparator: string;
+    fullDateTimePattern: string;
+    longTimePattern: string;
+    shortDatePattern: string;
+    shortTimePattern: string;
+  }
+
   export interface Auth {
     policies: Policy;
     grantedPolicies: Policy;
@@ -32,18 +57,21 @@ export namespace ApplicationConfiguration {
     [key: string]: boolean;
   }
 
-  export interface Setting {
-    values: { [key: string]: 'Abp.Localization.DefaultLanguage' };
+  export interface Value {
+    values: ABP.Dictionary<string>;
   }
 
   export interface CurrentUser {
-    isAuthenticated: boolean;
+    email: string;
+    emailVerified: false;
     id: string;
+    isAuthenticated: boolean;
+    roles: string[];
     tenantId: string;
     userName: string;
-  }
-
-  export interface Features {
-    values: Setting;
+    name: string;
+    phoneNumber: string;
+    phoneNumberVerified: boolean;
+    surName: string;
   }
 }

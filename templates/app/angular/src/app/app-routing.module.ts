@@ -1,35 +1,30 @@
-import { IDENTITY_ROUTES } from '@abp/ng.identity';
-import { ACCOUNT_ROUTES } from '@abp/ng.account';
 import { NgModule } from '@angular/core';
-import { Routes, RouterModule } from '@angular/router';
-import { ABP } from '@abp/ng.core';
-import { TENANT_MANAGEMENT_ROUTES } from '@abp/ng.tenant-management';
+import { RouterModule, Routes } from '@angular/router';
 
 const routes: Routes = [
   {
     path: '',
-    loadChildren: () => import('./home/home.module').then(m => m.HomeModule),
-    data: {
-      routes: {
-        name: '::Menu:Home',
-      } as ABP.Route,
-    },
+    pathMatch: 'full',
+    loadChildren: () => import('./home/home.module').then((m) => m.HomeModule),
   },
   {
     path: 'account',
-    loadChildren: () => import('./lazy-libs/account-wrapper.module').then(m => m.AccountWrapperModule),
-    data: { routes: ACCOUNT_ROUTES },
+    loadChildren: () =>
+      import('@abp/ng.account').then((m) => m.AccountModule.forLazy({ redirectUrl: '/' })),
   },
   {
     path: 'identity',
-    loadChildren: () => import('./lazy-libs/identity-wrapper.module').then(m => m.IdentityWrapperModule),
-    data: { routes: IDENTITY_ROUTES },
+    loadChildren: () => import('@abp/ng.identity').then((m) => m.IdentityModule.forLazy()),
   },
   {
     path: 'tenant-management',
     loadChildren: () =>
-      import('./lazy-libs/tenant-management-wrapper.module').then(m => m.TenantManagementWrapperModule),
-    data: { routes: TENANT_MANAGEMENT_ROUTES },
+      import('@abp/ng.tenant-management').then((m) => m.TenantManagementModule.forLazy()),
+  },
+  {
+    path: 'setting-management',
+    loadChildren: () =>
+      import('@abp/ng.setting-management').then((m) => m.SettingManagementModule.forLazy()),
   },
 ];
 
