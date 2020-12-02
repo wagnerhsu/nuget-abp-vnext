@@ -24,6 +24,8 @@ namespace Volo.Abp.Identity.Blazor.Pages.Identity
         protected AssignedRoleViewModel[] EditUserRoles;
 
         protected string ManagePermissionsPolicyName;
+        
+        protected bool HasManagePermissionsPermission { get; set; }
 
         protected string CreateModalSelectedTab = DefaultSelectedTab;
 
@@ -40,13 +42,19 @@ namespace Volo.Abp.Identity.Blazor.Pages.Identity
             ManagePermissionsPolicyName = IdentityPermissions.Users.ManagePermissions;
         }
 
-        protected async override Task OnInitializedAsync()
+        protected override async Task OnInitializedAsync()
         {
             await base.OnInitializedAsync();
 
             Roles = (await AppService.GetAssignableRolesAsync()).Items;
         }
+        
+        protected override async Task SetPermissionsAsync()
+        {
+            await base.SetPermissionsAsync();
 
+            HasManagePermissionsPermission = await AuthorizationService.IsGrantedAsync(IdentityPermissions.Users.ManagePermissions);
+        }
 
         protected override Task OpenCreateModalAsync()
         {
@@ -69,11 +77,11 @@ namespace Volo.Abp.Identity.Blazor.Pages.Identity
             return base.OnCreatingEntityAsync();
         }
 
-        protected async override Task OpenEditModalAsync(Guid id)
+        protected override async Task OpenEditModalAsync(IdentityUserDto entity)
         {
             EditModalSelectedTab = DefaultSelectedTab;
 
-            var userRoleNames = (await AppService.GetRolesAsync(id)).Items.Select(r => r.Name).ToList();
+            var userRoleNames = (await AppService.GetRolesAsync(entity.Id)).Items.Select(r => r.Name).ToList();
 
             EditUserRoles = Roles.Select(x => new AssignedRoleViewModel
             {
@@ -81,7 +89,7 @@ namespace Volo.Abp.Identity.Blazor.Pages.Identity
                 IsAssigned = userRoleNames.Contains(x.Name)
             }).ToArray();
 
-            await base.OpenEditModalAsync(id);
+            await base.OpenEditModalAsync(entity);
         }
 
         protected override Task OnUpdatingEntityAsync()
