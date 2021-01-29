@@ -16,7 +16,7 @@ using Volo.Abp.EventBus.Distributed;
 using Volo.Abp.EventBus.Local;
 using Volo.Abp.Guids;
 using Volo.Abp.MongoDB;
-using Volo.Abp.MongoDB.Volo.Abp.Domain.Repositories.MongoDB;
+using Volo.Abp.MultiTenancy;
 
 namespace Volo.Abp.Domain.Repositories.MongoDB
 {
@@ -61,26 +61,21 @@ namespace Volo.Abp.Domain.Repositories.MongoDB
 
         protected IMongoDbContextProvider<TMongoDbContext> DbContextProvider { get; }
 
-        public ILocalEventBus LocalEventBus { get; set; }
+        public ILocalEventBus LocalEventBus => LazyServiceProvider.LazyGetService<ILocalEventBus>(NullLocalEventBus.Instance);
 
-        public IDistributedEventBus DistributedEventBus { get; set; }
+        public IDistributedEventBus DistributedEventBus => LazyServiceProvider.LazyGetService<IDistributedEventBus>(NullDistributedEventBus.Instance);
 
-        public IEntityChangeEventHelper EntityChangeEventHelper { get; set; }
+        public IEntityChangeEventHelper EntityChangeEventHelper => LazyServiceProvider.LazyGetService<IEntityChangeEventHelper>(NullEntityChangeEventHelper.Instance);
 
-        public IGuidGenerator GuidGenerator { get; set; }
+        public IGuidGenerator GuidGenerator => LazyServiceProvider.LazyGetService<IGuidGenerator>(SimpleGuidGenerator.Instance);
 
-        public IAuditPropertySetter AuditPropertySetter { get; set; }
+        public IAuditPropertySetter AuditPropertySetter => LazyServiceProvider.LazyGetRequiredService<IAuditPropertySetter>();
 
-        public IMongoDbBulkOperationProvider BulkOperationProvider { get; set; }
+        public IMongoDbBulkOperationProvider BulkOperationProvider => LazyServiceProvider.LazyGetService<IMongoDbBulkOperationProvider>();
 
         public MongoDbRepository(IMongoDbContextProvider<TMongoDbContext> dbContextProvider)
         {
             DbContextProvider = dbContextProvider;
-
-            LocalEventBus = NullLocalEventBus.Instance;
-            DistributedEventBus = NullDistributedEventBus.Instance;
-            EntityChangeEventHelper = NullEntityChangeEventHelper.Instance;
-            GuidGenerator = SimpleGuidGenerator.Instance;
         }
 
         public override async Task<TEntity> InsertAsync(
@@ -320,16 +315,26 @@ namespace Volo.Abp.Domain.Repositories.MongoDB
         }
 
         public override async Task DeleteManyAsync(
-            IEnumerable<TEntity> entities,
-            bool autoSave = false,
-            CancellationToken cancellationToken = default)
+           IEnumerable<TEntity> entities,
+           bool autoSave = false,
+           CancellationToken cancellationToken = default)
         {
-            var entityArray = entities.ToArray();
+            var softDeletedEntities = new List<TEntity>();
+            var hardDeletedEntities = new List<TEntity>();
 
-            foreach (var entity in entityArray)
+            foreach (var entity in entities)
             {
                 await ApplyAbpConceptsForDeletedEntityAsync(entity);
                 SetNewConcurrencyStamp(entity);
+
+                if (typeof(ISoftDelete).IsAssignableFrom(typeof(TEntity)) && !IsHardDeleted(entity))
+                {
+                    softDeletedEntities.Add(entity);
+                }
+                else
+                {
+                    hardDeletedEntities.Add(entity);
+                }
             }
 
             var dbContext = await GetDbContextAsync(GetCancellationToken(cancellationToken));
@@ -337,54 +342,57 @@ namespace Volo.Abp.Domain.Repositories.MongoDB
 
             if (BulkOperationProvider != null)
             {
-                await BulkOperationProvider.DeleteManyAsync(this, entityArray, dbContext.SessionHandle, autoSave, cancellationToken);
+                await BulkOperationProvider.DeleteManyAsync(this, entities.ToArray(), dbContext.SessionHandle, autoSave, cancellationToken);
                 return;
             }
 
-            var entitiesCount = entityArray.Count();
-
-            if (typeof(ISoftDelete).IsAssignableFrom(typeof(TEntity)))
+            if (softDeletedEntities.Count > 0)
             {
                 UpdateResult updateResult;
+                var softDeleteEntitiesCount = softDeletedEntities.Count;
+
                 if (dbContext.SessionHandle != null)
                 {
                     updateResult = await collection.UpdateManyAsync(
                         dbContext.SessionHandle,
-                        CreateEntitiesFilter(entityArray),
+                        CreateEntitiesFilter(softDeletedEntities),
                         Builders<TEntity>.Update.Set(x => ((ISoftDelete)x).IsDeleted, true)
                         );
                 }
                 else
                 {
                     updateResult = await collection.UpdateManyAsync(
-                        CreateEntitiesFilter(entityArray),
+                        CreateEntitiesFilter(softDeletedEntities),
                         Builders<TEntity>.Update.Set(x => ((ISoftDelete)x).IsDeleted, true)
                         );
                 }
 
-                if (updateResult.MatchedCount < entitiesCount)
+                if (updateResult.MatchedCount < softDeleteEntitiesCount)
                 {
                     ThrowOptimisticConcurrencyException();
                 }
             }
-            else
+
+            if (hardDeletedEntities.Count > 0)
             {
                 DeleteResult deleteResult;
+                var hardDeletedEntitiesCount = hardDeletedEntities.Count;
+
                 if (dbContext.SessionHandle != null)
                 {
                     deleteResult = await collection.DeleteManyAsync(
                         dbContext.SessionHandle,
-                        CreateEntitiesFilter(entityArray)
+                        CreateEntitiesFilter(hardDeletedEntities)
                         );
                 }
                 else
                 {
                     deleteResult = await collection.DeleteManyAsync(
-                        CreateEntitiesFilter(entityArray)
+                        CreateEntitiesFilter(hardDeletedEntities)
                         );
                 }
 
-                if (deleteResult.DeletedCount < entitiesCount)
+                if (deleteResult.DeletedCount < hardDeletedEntitiesCount)
                 {
                     ThrowOptimisticConcurrencyException();
                 }
@@ -477,6 +485,17 @@ namespace Volo.Abp.Domain.Repositories.MongoDB
                     ? collection.AsQueryable(dbContext.SessionHandle)
                     : collection.AsQueryable()
             );
+        }
+
+        public async Task<IAggregateFluent<TEntity>> GetAggregateAsync(CancellationToken cancellationToken = default)
+        {
+            var dbContext = await GetDbContextAsync(cancellationToken);
+            var collection = await GetCollectionAsync(cancellationToken);
+
+            return ApplyDataFilters(
+                dbContext.SessionHandle != null
+                    ? collection.Aggregate(dbContext.SessionHandle)
+                    : collection.Aggregate());
         }
 
         protected virtual bool IsHardDeleted(TEntity entity)
@@ -625,6 +644,22 @@ namespace Volo.Abp.Domain.Repositories.MongoDB
         protected virtual void ThrowOptimisticConcurrencyException()
         {
             throw new AbpDbConcurrencyException("Database operation expected to affect 1 row but actually affected 0 row. Data may have been modified or deleted since entities were loaded. This exception has been thrown on optimistic concurrency check.");
+        }
+
+        protected virtual IAggregateFluent<TEntity> ApplyDataFilters(IAggregateFluent<TEntity> aggregate)
+        {
+            if (typeof(ISoftDelete).IsAssignableFrom(typeof(TEntity)) && DataFilter.IsEnabled<ISoftDelete>())
+            {
+                aggregate = aggregate.Match(e => ((ISoftDelete)e).IsDeleted == false);
+            }
+
+            if (typeof(IMultiTenant).IsAssignableFrom(typeof(TEntity)) && DataFilter.IsEnabled<IMultiTenant>())
+            {
+                var tenantId = CurrentTenant.Id;
+                aggregate = aggregate.Match(e => ((IMultiTenant)e).TenantId == tenantId);
+            }
+
+            return aggregate;
         }
 
         [Obsolete("This method will be removed in future versions.")]

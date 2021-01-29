@@ -8,6 +8,7 @@ using MongoDB.Bson;
 using MongoDB.Driver;
 using Volo.Abp.Data;
 using Volo.Abp.MongoDB;
+using Volo.Abp.MultiTenancy;
 using Volo.Abp.Threading;
 
 namespace Volo.Abp.Uow.MongoDB
@@ -20,15 +21,18 @@ namespace Volo.Abp.Uow.MongoDB
         private readonly IUnitOfWorkManager _unitOfWorkManager;
         private readonly IConnectionStringResolver _connectionStringResolver;
         private readonly ICancellationTokenProvider _cancellationTokenProvider;
+        private readonly ICurrentTenant _currentTenant;
 
         public UnitOfWorkMongoDbContextProvider(
             IUnitOfWorkManager unitOfWorkManager,
             IConnectionStringResolver connectionStringResolver,
-            ICancellationTokenProvider cancellationTokenProvider)
+            ICancellationTokenProvider cancellationTokenProvider,
+            ICurrentTenant currentTenant)
         {
             _unitOfWorkManager = unitOfWorkManager;
             _connectionStringResolver = connectionStringResolver;
             _cancellationTokenProvider = cancellationTokenProvider;
+            _currentTenant = currentTenant;
 
             Logger = NullLogger<UnitOfWorkMongoDbContextProvider<TMongoDbContext>>.Instance;
         }
@@ -36,12 +40,16 @@ namespace Volo.Abp.Uow.MongoDB
         [Obsolete("Use CreateDbContextAsync")]
         public TMongoDbContext GetDbContext()
         {
-            Logger.LogWarning(
-                "UnitOfWorkDbContextProvider.GetDbContext is deprecated. Use GetDbContextAsync instead! " +
-                "You are probably using LINQ (LINQ extensions) directly on a repository. In this case, use repository.GetQueryableAsync() method " +
-                "to obtain an IQueryable<T> instance and use LINQ (LINQ extensions) on this object. "
-            );
-            Logger.LogWarning(Environment.StackTrace.Truncate(2048));
+            if (UnitOfWork.EnableObsoleteDbContextCreationWarning &&
+                !UnitOfWorkManager.DisableObsoleteDbContextCreationWarning.Value)
+            {
+                Logger.LogWarning(
+                    "UnitOfWorkDbContextProvider.GetDbContext is deprecated. Use GetDbContextAsync instead! " +
+                    "You are probably using LINQ (LINQ extensions) directly on a repository. In this case, use repository.GetQueryableAsync() method " +
+                    "to obtain an IQueryable<T> instance and use LINQ (LINQ extensions) on this object. "
+                );
+                Logger.LogWarning(Environment.StackTrace.Truncate(2048));
+            }
 
             var unitOfWork = _unitOfWorkManager.Current;
             if (unitOfWork == null)
@@ -50,7 +58,7 @@ namespace Volo.Abp.Uow.MongoDB
                     $"A {nameof(IMongoDatabase)} instance can only be created inside a unit of work!");
             }
 
-            var connectionString = _connectionStringResolver.Resolve<TMongoDbContext>();
+            var connectionString = ResolveConnectionString();
             var dbContextKey = $"{typeof(TMongoDbContext).FullName}_{connectionString}";
 
             var mongoUrl = new MongoUrl(connectionString);
@@ -77,7 +85,7 @@ namespace Volo.Abp.Uow.MongoDB
                     $"A {nameof(IMongoDatabase)} instance can only be created inside a unit of work!");
             }
 
-            var connectionString = await _connectionStringResolver.ResolveAsync<TMongoDbContext>();
+            var connectionString = await ResolveConnectionStringAsync();
             var dbContextKey = $"{typeof(TMongoDbContext).FullName}_{connectionString}";
 
             var mongoUrl = new MongoUrl(connectionString);
@@ -174,7 +182,10 @@ namespace Volo.Abp.Uow.MongoDB
 
                 unitOfWork.AddTransactionApi(
                     transactionApiKey,
-                    new MongoDbTransactionApi(session)
+                    new MongoDbTransactionApi(
+                        session,
+                        _cancellationTokenProvider
+                    )
                 );
 
                 dbContext.ToAbpMongoDbContext().InitializeDatabase(database, client, session);
@@ -211,7 +222,10 @@ namespace Volo.Abp.Uow.MongoDB
 
                 unitOfWork.AddTransactionApi(
                     transactionApiKey,
-                    new MongoDbTransactionApi(session)
+                    new MongoDbTransactionApi(
+                        session,
+                        _cancellationTokenProvider
+                    )
                 );
 
                 dbContext.ToAbpMongoDbContext().InitializeDatabase(database, client, session);
@@ -222,6 +236,35 @@ namespace Volo.Abp.Uow.MongoDB
             }
 
             return dbContext;
+        }
+
+        private async Task<string> ResolveConnectionStringAsync()
+        {
+            // Multi-tenancy unaware contexts should always use the host connection string
+            if (typeof(TMongoDbContext).IsDefined(typeof(IgnoreMultiTenancyAttribute), false))
+            {
+                using (_currentTenant.Change(null))
+                {
+                    return await _connectionStringResolver.ResolveAsync<TMongoDbContext>();
+                }
+            }
+
+            return await _connectionStringResolver.ResolveAsync<TMongoDbContext>();
+        }
+
+        [Obsolete("Use ResolveConnectionStringAsync method.")]
+        private string ResolveConnectionString()
+        {
+            // Multi-tenancy unaware contexts should always use the host connection string
+            if (typeof(TMongoDbContext).IsDefined(typeof(IgnoreMultiTenancyAttribute), false))
+            {
+                using (_currentTenant.Change(null))
+                {
+                    return _connectionStringResolver.Resolve<TMongoDbContext>();
+                }
+            }
+
+            return _connectionStringResolver.Resolve<TMongoDbContext>();
         }
 
         protected virtual CancellationToken GetCancellationToken(CancellationToken preferredValue = default)
