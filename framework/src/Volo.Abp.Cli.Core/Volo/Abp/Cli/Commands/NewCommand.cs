@@ -12,11 +12,13 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Volo.Abp.Cli.Args;
 using Volo.Abp.Cli.Auth;
+using Volo.Abp.Cli.Commands.Services;
 using Volo.Abp.Cli.Http;
 using Volo.Abp.Cli.ProjectBuilding;
 using Volo.Abp.Cli.ProjectBuilding.Building;
 using Volo.Abp.Cli.ProjectBuilding.Templates.App;
 using Volo.Abp.Cli.ProjectBuilding.Templates.Console;
+using Volo.Abp.Cli.ProjectBuilding.Templates.Microservice;
 using Volo.Abp.Cli.ProjectModification;
 using Volo.Abp.Cli.Utils;
 using Volo.Abp.DependencyInjection;
@@ -31,14 +33,17 @@ namespace Volo.Abp.Cli.Commands
 
         protected TemplateProjectBuilder TemplateProjectBuilder { get; }
         public ITemplateInfoProvider TemplateInfoProvider { get; }
+        public ConnectionStringProvider ConnectionStringProvider { get; }
 
         public NewCommand(TemplateProjectBuilder templateProjectBuilder
             , ITemplateInfoProvider templateInfoProvider,
-            EfCoreMigrationManager efCoreMigrationManager)
+            EfCoreMigrationManager efCoreMigrationManager,
+            ConnectionStringProvider connectionStringProvider)
         {
             _efCoreMigrationManager = efCoreMigrationManager;
             TemplateProjectBuilder = templateProjectBuilder;
             TemplateInfoProvider = templateInfoProvider;
+            ConnectionStringProvider = connectionStringProvider;
 
             Logger = NullLogger<NewCommand>.Instance;
         }
@@ -63,6 +68,10 @@ namespace Volo.Abp.Cli.Commands
             if (template != null)
             {
                 Logger.LogInformation("Template: " + template);
+            }
+            else
+            {
+                template = (await TemplateInfoProvider.GetDefaultAsync()).Name;
             }
 
             var version = commandLineArgs.Options.GetOrNull(Options.Version.Short, Options.Version.Long);
@@ -105,6 +114,12 @@ namespace Volo.Abp.Cli.Commands
             if (uiFramework != UiFramework.NotSpecified)
             {
                 Logger.LogInformation("UI Framework: " + uiFramework);
+            }
+
+            var publicWebSite = uiFramework != UiFramework.None && commandLineArgs.Options.ContainsKey(Options.PublicWebSite.Long);
+            if (publicWebSite)
+            {
+                Logger.LogInformation("Public Web Site: yes");
             }
 
             var mobileApp = GetMobilePreference(commandLineArgs);
@@ -154,7 +169,7 @@ namespace Volo.Abp.Cli.Commands
                 databaseManagementSystem != DatabaseManagementSystem.NotSpecified &&
                 databaseManagementSystem != DatabaseManagementSystem.SQLServer)
             {
-                connectionString = GetNewConnectionStringByDbms(databaseManagementSystem, outputFolder);
+                connectionString = ConnectionStringProvider.GetByDbms(databaseManagementSystem, outputFolder);
             }
 
             commandLineArgs.Options.Add(CliConsts.Command, commandLineArgs.Command);
@@ -168,6 +183,7 @@ namespace Volo.Abp.Cli.Commands
                     databaseManagementSystem,
                     uiFramework,
                     mobileApp,
+                    publicWebSite,
                     gitHubAbpLocalRepositoryPath,
                     gitHubVoloLocalRepositoryPath,
                     templateSource,
@@ -215,50 +231,18 @@ namespace Volo.Abp.Cli.Commands
                 }
             }
 
-            DeleteMigrationsIfNeeded(databaseProvider, databaseManagementSystem, outputFolder);
-
             Logger.LogInformation($"'{projectName}' has been successfully created to '{outputFolder}'");
 
-            if (AppTemplateBase.IsAppTemplate(template ?? (await TemplateInfoProvider.GetDefaultAsync()).Name))
+
+            if (AppTemplateBase.IsAppTemplate(template))
             {
                 var isCommercial = template == AppProTemplate.TemplateName;
                 OpenThanksPage(uiFramework, databaseProvider, isTiered || commandLineArgs.Options.ContainsKey("separate-identity-server"), isCommercial);
             }
-        }
-
-        private string GetNewConnectionStringByDbms(DatabaseManagementSystem databaseManagementSystem, string outputFolder)
-        {
-            switch (databaseManagementSystem)
+            else if (MicroserviceTemplateBase.IsMicroserviceTemplate(template))
             {
-                case DatabaseManagementSystem.MySQL:
-                    return "Server=localhost;Port=3306;Database=MyProjectName;Uid=root;Pwd=myPassword;";
-                case DatabaseManagementSystem.PostgreSQL:
-                    return "User ID=root;Password=myPassword;Host=localhost;Port=5432;Database=MyProjectName;Pooling=true;Min Pool Size=0;Max Pool Size=100;Connection Lifetime=0;";
-                //case DatabaseManagementSystem.Oracle:
-                case DatabaseManagementSystem.OracleDevart:
-                    return "Data Source=MyProjectName;Integrated Security=yes;";
-                case DatabaseManagementSystem.SQLite:
-                    return $"Data Source={Path.Combine(outputFolder,"database\\MyProjectName.db")};Version=3;";
-                default:
-                    return null;
+                OpenMicroserviceDocumentPage();
             }
-        }
-
-        private void DeleteMigrationsIfNeeded(DatabaseProvider databaseProvider, DatabaseManagementSystem databaseManagementSystem, string outputFolder)
-        {
-            if (databaseManagementSystem == DatabaseManagementSystem.NotSpecified || databaseManagementSystem == DatabaseManagementSystem.SQLServer)
-            {
-                return;
-            }
-
-            if (databaseProvider != DatabaseProvider.NotSpecified && databaseProvider != DatabaseProvider.EntityFrameworkCore)
-            {
-                return;
-            }
-
-            Logger.LogInformation($"Deleting migrations...");
-
-            _efCoreMigrationManager.RemoveAllMigrations(outputFolder);
         }
 
         private void OpenThanksPage(UiFramework uiFramework, DatabaseProvider databaseProvider, bool tiered, bool commercial)
@@ -270,19 +254,14 @@ namespace Volo.Abp.Cli.Commands
             var tieredYesNo = tiered ? "yes" : "no";
             var url = $"https://{urlPrefix}.abp.io/project-created-success?ui={uiFramework:g}&db={databaseProvider:g}&tiered={tieredYesNo}";
 
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                url = url.Replace("&", "^&");
-                Process.Start(new ProcessStartInfo("cmd", $"/c start {url}") { CreateNoWindow = true });
-            }
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-            {
-                Process.Start("xdg-open", url);
-            }
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-            {
-                Process.Start("open", url);
-            }
+            CmdHelper.OpenWebPage(url);
+        }
+
+        private void OpenMicroserviceDocumentPage()
+        {
+            var url = "https://docs.abp.io/en/commercial/latest/startup-templates/microservice/index";
+
+            CmdHelper.OpenWebPage(url);
         }
 
         private bool GetCreateSolutionFolderPreference(CommandLineArgs commandLineArgs)
@@ -487,6 +466,11 @@ namespace Volo.Abp.Cli.Commands
             {
                 public const string Short = "m";
                 public const string Long = "mobile";
+            }
+
+            public static class PublicWebSite
+            {
+                public const string Long = "with-public-website";
             }
 
             public static class TemplateSource

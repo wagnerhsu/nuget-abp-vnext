@@ -15,6 +15,7 @@ using Volo.Abp.AspNetCore.Mvc.UI.Theme.Shared;
 using Volo.Abp.AspNetCore.Serilog;
 using Volo.Abp.AuditLogging.EntityFrameworkCore;
 using Volo.Abp.Autofac;
+using Volo.Abp.BlobStoring.Database.EntityFrameworkCore;
 using Volo.Abp.Data;
 using Volo.Abp.EntityFrameworkCore;
 using Volo.Abp.EntityFrameworkCore.SqlServer;
@@ -30,6 +31,7 @@ using Volo.Abp.PermissionManagement;
 using Volo.Abp.PermissionManagement.EntityFrameworkCore;
 using Volo.Abp.PermissionManagement.Identity;
 using Volo.Abp.SettingManagement.EntityFrameworkCore;
+using Volo.Abp.Swashbuckle;
 using Volo.Abp.TenantManagement;
 using Volo.Abp.TenantManagement.EntityFrameworkCore;
 using Volo.Abp.TenantManagement.Web;
@@ -63,8 +65,10 @@ namespace Volo.CmsKit
         typeof(AbpTenantManagementApplicationModule),
         typeof(AbpTenantManagementEntityFrameworkCoreModule),
         typeof(AbpAspNetCoreMvcUiBasicThemeModule),
-        typeof(AbpAspNetCoreSerilogModule)
-        )]
+        typeof(AbpAspNetCoreSerilogModule),
+        typeof(BlobStoringDatabaseEntityFrameworkCoreModule),
+        typeof(AbpSwashbuckleModule)
+    )]
     public class CmsKitWebUnifiedModule : AbpModule
     {
         public override void PreConfigureServices(ServiceConfigurationContext context)
@@ -156,7 +160,7 @@ namespace Volo.CmsKit
             app.UseAuthorization();
 
             app.UseSwagger();
-            app.UseSwaggerUI(options =>
+            app.UseAbpSwaggerUI(options =>
             {
                 options.SwaggerEndpoint("/swagger/v1/swagger.json", "Support APP API");
             });

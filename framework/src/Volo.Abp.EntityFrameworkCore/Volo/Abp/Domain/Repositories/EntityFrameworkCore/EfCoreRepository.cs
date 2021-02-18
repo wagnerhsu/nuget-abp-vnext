@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+using JetBrains.Annotations;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using System;
@@ -12,6 +13,7 @@ using Volo.Abp.Domain.Entities;
 using Volo.Abp.EntityFrameworkCore;
 using Volo.Abp.EntityFrameworkCore.DependencyInjection;
 using Volo.Abp.Guids;
+using Volo.Abp.MultiTenancy;
 
 namespace Volo.Abp.Domain.Repositories.EntityFrameworkCore
 {
@@ -20,18 +22,42 @@ namespace Volo.Abp.Domain.Repositories.EntityFrameworkCore
         where TEntity : class, IEntity
     {
         [Obsolete("Use GetDbContextAsync() method.")]
-        protected virtual TDbContext DbContext => _dbContextProvider.GetDbContext();
+        protected virtual TDbContext DbContext => GetDbContext();
 
         [Obsolete("Use GetDbContextAsync() method.")]
-        DbContext IEfCoreRepository<TEntity>.DbContext => DbContext.As<DbContext>();
+        DbContext IEfCoreRepository<TEntity>.DbContext => GetDbContext() as DbContext;
 
         async Task<DbContext> IEfCoreRepository<TEntity>.GetDbContextAsync()
         {
             return await GetDbContextAsync() as DbContext;
         }
 
+        [Obsolete("Use GetDbContextAsync() method.")]
+        private TDbContext GetDbContext()
+        {
+            // Multi-tenancy unaware entities should always use the host connection string
+            if (!EntityHelper.IsMultiTenant<TEntity>())
+            {
+                using (CurrentTenant.Change(null))
+                {
+                    return _dbContextProvider.GetDbContext();
+                }
+            }
+
+            return _dbContextProvider.GetDbContext();
+        }
+
         protected virtual Task<TDbContext> GetDbContextAsync()
         {
+            // Multi-tenancy unaware entities should always use the host connection string
+            if (!EntityHelper.IsMultiTenant<TEntity>())
+            {
+                using (CurrentTenant.Change(null))
+                {
+                    return _dbContextProvider.GetDbContextAsync();
+                }
+            }
+
             return _dbContextProvider.GetDbContextAsync();
         }
 
@@ -53,14 +79,13 @@ namespace Volo.Abp.Domain.Repositories.EntityFrameworkCore
         private readonly IDbContextProvider<TDbContext> _dbContextProvider;
         private readonly Lazy<AbpEntityOptions<TEntity>> _entityOptionsLazy;
 
-        public IGuidGenerator GuidGenerator { get; set; }
+        public virtual IGuidGenerator GuidGenerator => LazyServiceProvider.LazyGetService<IGuidGenerator>(SimpleGuidGenerator.Instance);
 
-        public IEfCoreBulkOperationProvider BulkOperationProvider { get; set; }
+        public IEfCoreBulkOperationProvider BulkOperationProvider => LazyServiceProvider.LazyGetService<IEfCoreBulkOperationProvider>();
 
         public EfCoreRepository(IDbContextProvider<TDbContext> dbContextProvider)
         {
             _dbContextProvider = dbContextProvider;
-            GuidGenerator = SimpleGuidGenerator.Instance;
 
             _entityOptionsLazy = new Lazy<AbpEntityOptions<TEntity>>(
                 () => ServiceProvider
@@ -103,7 +128,7 @@ namespace Volo.Abp.Domain.Repositories.EntityFrameworkCore
                     this,
                     entityArray,
                     autoSave,
-                    cancellationToken
+                    GetCancellationToken(cancellationToken)
                 );
                 return;
             }
@@ -142,7 +167,7 @@ namespace Volo.Abp.Domain.Repositories.EntityFrameworkCore
                     this,
                     entities,
                     autoSave,
-                    cancellationToken
+                    GetCancellationToken(cancellationToken)
                     );
 
                 return;
@@ -264,10 +289,7 @@ namespace Volo.Abp.Domain.Repositories.EntityFrameworkCore
                 .Where(predicate)
                 .ToListAsync(GetCancellationToken(cancellationToken));
 
-            foreach (var entity in entities)
-            {
-                dbSet.Remove(entity);
-            }
+            await DeleteManyAsync(entities, autoSave, cancellationToken);
 
             if (autoSave)
             {
@@ -409,7 +431,7 @@ namespace Volo.Abp.Domain.Repositories.EntityFrameworkCore
         public virtual async Task<TEntity> FindAsync(TKey id, bool includeDetails = true, CancellationToken cancellationToken = default)
         {
             return includeDetails
-                ? await (await WithDetailsAsync()).FirstOrDefaultAsync(e => e.Id.Equals(id), GetCancellationToken(cancellationToken))
+                ? await (await WithDetailsAsync()).OrderBy(e => e.Id).FirstOrDefaultAsync(e => e.Id.Equals(id), GetCancellationToken(cancellationToken))
                 : await (await GetDbSetAsync()).FindAsync(new object[] {id}, GetCancellationToken(cancellationToken));
         }
 
