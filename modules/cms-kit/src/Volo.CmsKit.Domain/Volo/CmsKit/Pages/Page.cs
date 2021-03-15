@@ -8,26 +8,25 @@ namespace Volo.CmsKit.Pages
 {
     public class Page : FullAuditedAggregateRoot<Guid>, IMultiTenant
     {
-        [CanBeNull] public virtual Guid? TenantId { get; protected set; }
+        public virtual Guid? TenantId { get; protected set; }
 
-        [NotNull] public virtual string Title { get; protected set; }
+        public virtual string Title { get; protected set; }
 
-        [NotNull] public virtual string Slug { get; protected set; }
+        public virtual string Slug { get; protected set; }
 
-        [CanBeNull] public virtual string Description { get; set; }
-
+        public virtual string Content { get; protected set; }
+        
         protected Page()
         {
         }
 
-        public Page(Guid id, [NotNull] string title, [NotNull] string slug, [CanBeNull] string description = null,
-            Guid? tenantId = null) : base(id)
+        internal Page(Guid id, [NotNull] string title, [NotNull] string slug, string content = null, Guid? tenantId = null) : base(id)
         {
-            Title = Check.NotNullOrEmpty(title, nameof(title), PageConsts.MaxTitleLength);
-            Slug = Check.NotNullOrEmpty(slug, nameof(slug), PageConsts.MaxSlugLength);
-            Description = Check.Length(description, nameof(description), PageConsts.MaxDescriptionLength);
-
             TenantId = tenantId;
+            
+            SetTitle(title);
+            SetSlug(slug);
+            SetContent(content);
         }
 
         public virtual void SetTitle(string title)
@@ -35,9 +34,14 @@ namespace Volo.CmsKit.Pages
             Title = Check.NotNullOrEmpty(title, nameof(title), PageConsts.MaxTitleLength);
         }
 
-        public virtual void SetSlug(string slug)
+        internal virtual void SetSlug(string slug)
         {
             Slug = Check.NotNullOrEmpty(slug, nameof(slug), PageConsts.MaxSlugLength);
+        }
+
+        public virtual void SetContent(string content)
+        {
+            Content = Check.Length(content, nameof(content), PageConsts.MaxContentLength);
         }
     }
 }

@@ -1,43 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Volo.Abp.Domain.Services;
-using Volo.Abp.EventBus.Distributed;
-using Volo.Abp.Uow;
 
 namespace Volo.CmsKit.Blogs
 {
-    public class BlogFeatureManager : DomainService, IBlogFeatureManager
+    public class BlogFeatureManager : DomainService
     {
         protected IBlogFeatureRepository BlogFeatureRepository { get; }
 
         protected IDefaultBlogFeatureProvider DefaultBlogFeatureProvider { get; }
 
-        protected IUnitOfWorkManager UnitOfWorkManager { get; }
-
-        protected IDistributedEventBus EventBus { get; }
-
         public BlogFeatureManager(
             IBlogFeatureRepository blogFeatureRepository,
-            IDefaultBlogFeatureProvider defaultBlogFeatureProvider,
-            IUnitOfWorkManager unitOfWorkManager,
-            IDistributedEventBus eventBus)
+            IDefaultBlogFeatureProvider defaultBlogFeatureProvider)
         {
             BlogFeatureRepository = blogFeatureRepository;
             DefaultBlogFeatureProvider = defaultBlogFeatureProvider;
-            UnitOfWorkManager = unitOfWorkManager;
-            EventBus = eventBus;
-        }
-
-        public async Task<List<BlogFeature>> GetListAsync(Guid blogId)
-        {
-            var blogFeatures = await BlogFeatureRepository.GetListAsync(blogId);
-
-            var defaultFeatures = await DefaultBlogFeatureProvider.GetDefaultFeaturesAsync(blogId);
-
-            defaultFeatures.ForEach(x => blogFeatures.AddIfNotContains(x));
-
-            return blogFeatures;
         }
 
         public async Task SetAsync(Guid blogId, string featureName, bool isEnabled)
@@ -53,15 +33,16 @@ namespace Volo.CmsKit.Blogs
                 blogFeature.IsEnabled = isEnabled;
                 await BlogFeatureRepository.UpdateAsync(blogFeature);
             }
+        }
 
-            await UnitOfWorkManager.Current.SaveChangesAsync();
+        public async Task SetDefaultsAsync(Guid blogId)
+        {
+            var defaultFeatures = await DefaultBlogFeatureProvider.GetDefaultFeaturesAsync(blogId);
 
-            await EventBus.PublishAsync(new BlogFeatureChangedEto
+            foreach (var feature in defaultFeatures)
             {
-                BlogId = blogId,
-                FeatureName = featureName,
-                IsEnabled = isEnabled
-            });
+                await SetAsync(blogId, feature.FeatureName, isEnabled: true);
+            }
         }
     }
 }

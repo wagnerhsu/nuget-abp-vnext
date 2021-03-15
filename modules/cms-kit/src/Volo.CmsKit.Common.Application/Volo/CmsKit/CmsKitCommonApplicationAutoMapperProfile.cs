@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
-using Volo.CmsKit.Contents;
-using Volo.CmsKit.Pages;
+using Volo.CmsKit.Blogs;
 using Volo.CmsKit.Tags;
 using Volo.CmsKit.Users;
 
@@ -13,6 +12,10 @@ namespace Volo.CmsKit
             CreateMap<Tag, TagDto>();
 
             CreateMap<CmsUser, CmsUserDto>();
+
+            CreateMap<BlogFeature, BlogFeatureCacheItem>();
+            CreateMap<BlogFeature, BlogFeatureDto>();
+            CreateMap<BlogFeatureCacheItem, BlogFeatureDto>().ReverseMap();
         }
     }
 }
