@@ -1,9 +1,8 @@
 ﻿using System;
 using Volo.Abp;
 using Volo.Abp.MongoDB;
-using Volo.CmsKit.Comments;
-using Volo.CmsKit.Contents;
 using Volo.CmsKit.Blogs;
+using Volo.CmsKit.Comments;
 using Volo.CmsKit.MediaDescriptors;
 using Volo.CmsKit.Pages;
 using Volo.CmsKit.Ratings;
@@ -45,11 +44,6 @@ namespace Volo.CmsKit.MongoDB
             builder.Entity<Rating>(x =>
             {
                 x.CollectionName = CmsKitDbProperties.DbTablePrefix + "Ratings";
-            });
-            
-            builder.Entity<Content>(x =>
-            {
-                x.CollectionName = CmsKitDbProperties.DbTablePrefix + "Contents";
             });
             
             builder.Entity<Tag>(x =>
