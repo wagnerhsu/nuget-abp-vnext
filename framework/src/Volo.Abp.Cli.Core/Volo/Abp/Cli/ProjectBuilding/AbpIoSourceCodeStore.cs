@@ -91,7 +91,7 @@ namespace Volo.Abp.Cli.ProjectBuilding
                 return new TemplateFile(File.ReadAllBytes(Path.Combine(templateSource, name + "-" + version + ".zip")), version, latestVersion, nugetVersion);
             }
 
-            var localCacheFile = Path.Combine(CliPaths.TemplateCache, name + "-" + version + ".zip");
+            var localCacheFile = Path.Combine(CliPaths.TemplateCache, name.Replace("/",".") + "-" + version + ".zip");
 
 #if DEBUG
             if (File.Exists(localCacheFile))
@@ -159,6 +159,11 @@ namespace Volo.Abp.Cli.ProjectBuilding
 
         private async Task<string> GetTemplateNugetVersionAsync(string name, string type, string version)
         {
+            if (type != SourceCodeTypes.Template)
+            {
+                return null;
+            }
+
             try
             {
                 var url = $"{CliUrls.WwwAbpIo}api/download/{type}/get-nuget-version/";

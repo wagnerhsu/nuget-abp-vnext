@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc.RazorPages;
+﻿using Markdig;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.DependencyInjection;
 using Volo.Abp.AspNetCore.Mvc.Localization;
 using Volo.Abp.AutoMapper;
@@ -55,6 +56,14 @@ namespace Volo.CmsKit.Public.Web
             {
                 options.AddMaps<CmsKitPublicWebModule>(validate: true);
             });
+
+            context.Services
+                .AddSingleton(_ => new MarkdownPipelineBuilder()
+                    .UseAutoLinks()
+                    .UseBootstrap()
+                    .UseGridTables()
+                    .UsePipeTables()
+                    .Build());
         }
 
         public override void PostConfigureServices(ServiceConfigurationContext context)
@@ -63,7 +72,9 @@ namespace Volo.CmsKit.Public.Web
             {
                 Configure<RazorPagesOptions>(options =>
                 {
-                    options.Conventions.AddPageRoute("/CmsKit/Pages/Index", @"/pages/{slug:minlength(1)}");
+                    options.Conventions.AddPageRoute("/Public/CmsKit/Pages/Index", @"/pages/{slug:minlength(1)}");
+                    options.Conventions.AddPageRoute("/Public/CmsKit/Blogs/Index", @"/blogs/{blogSlug:minlength(1)}");
+                    options.Conventions.AddPageRoute("/Public/CmsKit/Blogs/BlogPost", @"/blogs/{blogSlug}/{blogPostSlug:minlength(1)}");
                 });
             }
         }

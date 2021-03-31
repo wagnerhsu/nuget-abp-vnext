@@ -61,6 +61,18 @@ namespace Volo.CmsKit.Blogs
         }
 
         [Fact]
+        public async Task GetBySlugAsync_ShouldHaveAuthor_WithCorrectParameters()
+        {
+            var blogPost = await blogPostRepository.GetBySlugAsync(testData.Blog_Id, testData.BlogPost_1_Slug);
+
+            blogPost.ShouldNotBeNull();
+            blogPost.Id.ShouldBe(testData.BlogPost_1_Id);
+            blogPost.Slug.ShouldBe(testData.BlogPost_1_Slug);
+            blogPost.Author.ShouldNotBeNull();
+            blogPost.Author.Id.ShouldBe(testData.User1Id);
+        }
+
+        [Fact]
         public async Task GetBySlugAsync_ShouldThrowException_WithNonExistingBlogPostSlug()
         {
             var nonExistingSlugUrl = "absolutely-non-existing-url";
@@ -85,7 +97,7 @@ namespace Volo.CmsKit.Blogs
         [Fact]
         public async Task GetPagedListAsync_ShouldWorkProperly_WithBlogId_WhileGetting10_WithoutSorting()
         {
-            var result = await blogPostRepository.GetPagedListAsync(testData.Blog_Id, 0, 10, default);
+            var result = await blogPostRepository.GetListAsync(null, testData.Blog_Id);
 
             result.ShouldNotBeNull();
             result.ShouldNotBeEmpty();
@@ -93,9 +105,21 @@ namespace Volo.CmsKit.Blogs
         }
 
         [Fact]
+        public async Task GetPagedListAsync_ShouldHaveAuthor_WithBlogId_WhileGetting10_WithoutSorting()
+        {
+            var result = await blogPostRepository.GetListAsync(null, testData.Blog_Id);
+
+            result.ShouldNotBeNull();
+            result.ShouldNotBeEmpty();
+            result.Count.ShouldBe(2);
+
+            result.ForEach(blogPost => blogPost.Author.ShouldNotBeNull());
+        }
+
+        [Fact]
         public async Task GetPagedListAsync_ShouldWorkProperly_WithBlogId_WhileGetting1_WithoutSorting()
         {
-            var result = await blogPostRepository.GetPagedListAsync(testData.Blog_Id, default, 1, default);
+            var result = await blogPostRepository.GetListAsync(blogId: testData.Blog_Id, maxResultCount: 1);
 
             result.ShouldNotBeNull();
             result.ShouldNotBeEmpty();
@@ -105,7 +129,7 @@ namespace Volo.CmsKit.Blogs
         [Fact]
         public async Task GetPagedListAsync_ShouldWorkProperly_WithBlogId_WhileGetting1InPage2_WithoutSorting()
         {
-            var result = await blogPostRepository.GetPagedListAsync(testData.Blog_Id, 1, 1, default);
+            var result = await blogPostRepository.GetListAsync(blogId: testData.Blog_Id, skipCount: 1, maxResultCount: 1);
 
             result.ShouldNotBeNull();
             result.ShouldNotBeEmpty();
@@ -115,7 +139,7 @@ namespace Volo.CmsKit.Blogs
         [Fact]
         public async Task GetPagedListAsync_ShouldWorkProperly_WithBlogId_WhileGetting10_WithSortingByTitle()
         {
-            var result = await blogPostRepository.GetPagedListAsync(testData.Blog_Id, default, 10, nameof(BlogPost.Title));
+            var result = await blogPostRepository.GetListAsync(blogId: testData.Blog_Id, sorting: $"{nameof(BlogPost.Title)} asc");
 
             result.ShouldNotBeNull();
             result.ShouldNotBeEmpty();
