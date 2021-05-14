@@ -1,0 +1,1 @@
+https://github.com/wagnerhsu/nuget-abp-vnext/compare/wagner-dev...wagnerhsu:dev
