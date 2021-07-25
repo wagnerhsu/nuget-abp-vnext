@@ -17,38 +17,14 @@ namespace Volo.Abp.Cli.Utils
             "LPT2"
         };
 
-        private static readonly char[] IllegalChars = new[]
+        private static readonly string[] IllegalKeywords = new[]
         {
-            '/',
-            '?',
-            ':',
-            '&',
-            '\\',
-            '*',
-            '\'',
-            '<',
-            '>',
-            '|',
-            '#',
-            '%',
+            "Blazor"
         };
 
         private static bool HasParentDirectoryString(string projectName)
         {
             return projectName.Contains("..");
-        }
-
-        private static bool HasIllegalChar(string projectName)
-        {
-            foreach (var illegalWord in IllegalChars)
-            {
-                if (projectName.Contains(illegalWord))
-                {
-                    return false;
-                }
-            }
-
-            return true;
         }
 
         private static bool HasSurrogateOrControlChar(string projectName)
@@ -66,7 +42,20 @@ namespace Volo.Abp.Cli.Utils
                 }
             }
 
-            return true;
+            return false;
+        }
+
+        private static bool HasIllegalKeywords(string projectName)
+        {
+            foreach (var illegalKeyword in IllegalKeywords)
+            {
+                if (projectName.Contains(illegalKeyword))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         public static bool IsValid(string projectName)
@@ -74,11 +63,6 @@ namespace Volo.Abp.Cli.Utils
             if (projectName == null)
             {
                 throw new CliUsageException("Project name cannot be empty!");
-            }
-
-            if (HasIllegalChar(projectName))
-            {
-                return false;
             }
 
             if (HasSurrogateOrControlChar(projectName))
@@ -92,6 +76,11 @@ namespace Volo.Abp.Cli.Utils
             }
 
             if (IsIllegalProjectName(projectName))
+            {
+                return false;
+            }
+
+            if (HasIllegalKeywords(projectName))
             {
                 return false;
             }
