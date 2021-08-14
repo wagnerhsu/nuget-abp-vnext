@@ -1,1 +1,1 @@
-- Merge Code [github](https://github.com/wagnerhsu/nuget-abp-vnext/compare/master...abpframework:dev)
+https://github.com/wagnerhsu/nuget-abp-vnext/compare/wagner-dev...wagnerhsu:dev
