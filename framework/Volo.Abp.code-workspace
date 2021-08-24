@@ -1,0 +1,334 @@
+{
+    "folders": [
+        {
+            "path": "src\\Volo.Abp"
+        },
+        {
+            "path": "src\\Volo.Abp.ApiVersioning.Abstractions"
+        },
+        {
+            "path": "src\\Volo.Abp.AspNetCore"
+        },
+        {
+            "path": "src\\Volo.Abp.AspNetCore.Authentication.JwtBearer"
+        },
+        {
+            "path": "src\\Volo.Abp.AspNetCore.Authentication.OAuth"
+        },
+        {
+            "path": "src\\Volo.Abp.AspNetCore.Authentication.OpenIdConnect"
+        },
+        {
+            "path": "src\\Volo.Abp.AspNetCore.Components.WebAssembly"
+        },
+        {
+            "path": "src\\Volo.Abp.AspNetCore.Components.WebAssembly.BasicTheme"
+        },
+        {
+            "path": "src\\Volo.Abp.AspNetCore.Components.WebAssembly.Theming"
+        },
+        {
+            "path": "src\\Volo.Abp.AspNetCore.MultiTenancy"
+        },
+        {
+            "path": "src\\Volo.Abp.AspNetCore.Mvc"
+        },
+        {
+            "path": "src\\Volo.Abp.AspNetCore.Mvc.Client"
+        },
+        {
+            "path": "src\\Volo.Abp.AspNetCore.Mvc.Client.Common"
+        },
+        {
+            "path": "src\\Volo.Abp.AspNetCore.Mvc.Contracts"
+        },
+        {
+            "path": "src\\Volo.Abp.AspNetCore.Mvc.UI"
+        },
+        {
+            "path": "src\\Volo.Abp.AspNetCore.Mvc.UI.Bootstrap"
+        },
+        {
+            "path": "src\\Volo.Abp.AspNetCore.Mvc.UI.Bundling"
+        },
+        {
+            "path": "src\\Volo.Abp.AspNetCore.Mvc.UI.MultiTenancy"
+        },
+        {
+            "path": "src\\Volo.Abp.AspNetCore.Mvc.UI.Packages"
+        },
+        {
+            "path": "src\\Volo.Abp.AspNetCore.Mvc.UI.Theme.Basic"
+        },
+        {
+            "path": "src\\Volo.Abp.AspNetCore.Mvc.UI.Theme.Shared"
+        },
+        {
+            "path": "src\\Volo.Abp.AspNetCore.Mvc.UI.Theme.Shared.Demo"
+        },
+        {
+            "path": "src\\Volo.Abp.AspNetCore.Mvc.UI.Widgets"
+        },
+        {
+            "path": "src\\Volo.Abp.AspNetCore.Serilog"
+        },
+        {
+            "path": "src\\Volo.Abp.AspNetCore.SignalR"
+        },
+        {
+            "path": "src\\Volo.Abp.AspNetCore.TestBase"
+        },
+        {
+            "path": "src\\Volo.Abp.Auditing"
+        },
+        {
+            "path": "src\\Volo.Abp.Authorization"
+        },
+        {
+            "path": "src\\Volo.Abp.Autofac"
+        },
+        {
+            "path": "src\\Volo.Abp.Autofac.WebAssembly"
+        },
+        {
+            "path": "src\\Volo.Abp.AutoMapper"
+        },
+        {
+            "path": "src\\Volo.Abp.BackgroundJobs"
+        },
+        {
+            "path": "src\\Volo.Abp.BackgroundJobs.Abstractions"
+        },
+        {
+            "path": "src\\Volo.Abp.BackgroundJobs.HangFire"
+        },
+        {
+            "path": "src\\Volo.Abp.BackgroundJobs.Quartz"
+        },
+        {
+            "path": "src\\Volo.Abp.BackgroundJobs.RabbitMQ"
+        },
+        {
+            "path": "src\\Volo.Abp.BackgroundWorkers"
+        },
+        {
+            "path": "src\\Volo.Abp.BackgroundWorkers.Quartz"
+        },
+        {
+            "path": "src\\Volo.Abp.BlazoriseUI"
+        },
+        {
+            "path": "src\\Volo.Abp.BlobStoring"
+        },
+        {
+            "path": "src\\Volo.Abp.BlobStoring.Aliyun"
+        },
+        {
+            "path": "src\\Volo.Abp.BlobStoring.Aws"
+        },
+        {
+            "path": "src\\Volo.Abp.BlobStoring.Azure"
+        },
+        {
+            "path": "src\\Volo.Abp.BlobStoring.FileSystem"
+        },
+        {
+            "path": "src\\Volo.Abp.BlobStoring.Minio"
+        },
+        {
+            "path": "src\\Volo.Abp.Caching"
+        },
+        {
+            "path": "src\\Volo.Abp.Caching.StackExchangeRedis"
+        },
+        {
+            "path": "src\\Volo.Abp.Castle.Core"
+        },
+        {
+            "path": "src\\Volo.Abp.Cli"
+        },
+        {
+            "path": "src\\Volo.Abp.Cli.Core"
+        },
+        {
+            "path": "src\\Volo.Abp.Core"
+        },
+        {
+            "path": "src\\Volo.Abp.Dapper"
+        },
+        {
+            "path": "src\\Volo.Abp.Data"
+        },
+        {
+            "path": "src\\Volo.Abp.Ddd.Application"
+        },
+        {
+            "path": "src\\Volo.Abp.Ddd.Application.Contracts"
+        },
+        {
+            "path": "src\\Volo.Abp.Ddd.Domain"
+        },
+        {
+            "path": "src\\Volo.Abp.Emailing"
+        },
+        {
+            "path": "src\\Volo.Abp.EntityFrameworkCore"
+        },
+        {
+            "path": "src\\Volo.Abp.EntityFrameworkCore.MySQL"
+        },
+        {
+            "path": "src\\Volo.Abp.EntityFrameworkCore.Oracle"
+        },
+        {
+            "path": "src\\Volo.Abp.EntityFrameworkCore.Oracle.Devart"
+        },
+        {
+            "path": "src\\Volo.Abp.EntityFrameworkCore.PostgreSql"
+        },
+        {
+            "path": "src\\Volo.Abp.EntityFrameworkCore.Sqlite"
+        },
+        {
+            "path": "src\\Volo.Abp.EntityFrameworkCore.SqlServer"
+        },
+        {
+            "path": "src\\Volo.Abp.EventBus"
+        },
+        {
+            "path": "src\\Volo.Abp.EventBus.Kafka"
+        },
+        {
+            "path": "src\\Volo.Abp.EventBus.RabbitMQ"
+        },
+        {
+            "path": "src\\Volo.Abp.EventBus.Rebus"
+        },
+        {
+            "path": "src\\Volo.Abp.ExceptionHandling"
+        },
+        {
+            "path": "src\\Volo.Abp.Features"
+        },
+        {
+            "path": "src\\Volo.Abp.FluentValidation"
+        },
+        {
+            "path": "src\\Volo.Abp.GlobalFeatures"
+        },
+        {
+            "path": "src\\Volo.Abp.Guids"
+        },
+        {
+            "path": "src\\Volo.Abp.HangFire"
+        },
+        {
+            "path": "src\\Volo.Abp.Http"
+        },
+        {
+            "path": "src\\Volo.Abp.Http.Abstractions"
+        },
+        {
+            "path": "src\\Volo.Abp.Http.Client"
+        },
+        {
+            "path": "src\\Volo.Abp.Http.Client.IdentityModel"
+        },
+        {
+            "path": "src\\Volo.Abp.Http.Client.IdentityModel.Web"
+        },
+        {
+            "path": "src\\Volo.Abp.Http.Client.IdentityModel.WebAssembly"
+        },
+        {
+            "path": "src\\Volo.Abp.IdentityModel"
+        },
+        {
+            "path": "src\\Volo.Abp.Json"
+        },
+        {
+            "path": "src\\Volo.Abp.Kafka"
+        },
+        {
+            "path": "src\\Volo.Abp.Ldap"
+        },
+        {
+            "path": "src\\Volo.Abp.Localization"
+        },
+        {
+            "path": "src\\Volo.Abp.Localization.Abstractions"
+        },
+        {
+            "path": "src\\Volo.Abp.MailKit"
+        },
+        {
+            "path": "src\\Volo.Abp.MemoryDb"
+        },
+        {
+            "path": "src\\Volo.Abp.Minify"
+        },
+        {
+            "path": "src\\Volo.Abp.MongoDB"
+        },
+        {
+            "path": "src\\Volo.Abp.MultiTenancy"
+        },
+        {
+            "path": "src\\Volo.Abp.ObjectExtending"
+        },
+        {
+            "path": "src\\Volo.Abp.ObjectMapping"
+        },
+        {
+            "path": "src\\Volo.Abp.Quartz"
+        },
+        {
+            "path": "src\\Volo.Abp.RabbitMQ"
+        },
+        {
+            "path": "src\\Volo.Abp.Security"
+        },
+        {
+            "path": "src\\Volo.Abp.Serialization"
+        },
+        {
+            "path": "src\\Volo.Abp.Settings"
+        },
+        {
+            "path": "src\\Volo.Abp.Sms"
+        },
+        {
+            "path": "src\\Volo.Abp.Specifications"
+        },
+        {
+            "path": "src\\Volo.Abp.TestBase"
+        },
+        {
+            "path": "src\\Volo.Abp.TextTemplating"
+        },
+        {
+            "path": "src\\Volo.Abp.Threading"
+        },
+        {
+            "path": "src\\Volo.Abp.Timing"
+        },
+        {
+            "path": "src\\Volo.Abp.UI"
+        },
+        {
+            "path": "src\\Volo.Abp.UI.Navigation"
+        },
+        {
+            "path": "src\\Volo.Abp.Uow"
+        },
+        {
+            "path": "src\\Volo.Abp.Validation"
+        },
+        {
+            "path": "src\\Volo.Abp.Validation.Abstractions"
+        },
+        {
+            "path": "src\\Volo.Abp.VirtualFileSystem"
+        }
+    ]
+}
