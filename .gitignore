@@ -313,4 +313,8 @@ abp-build-config.json
 # Identity Server temp signature file
 tempkey.jwk
 
+*.abppkg.analyze.json
 
+deploy/nuget-api-key.txt
+deploy/npm-auth-token.txt
+deploy/ssh-password.txt
