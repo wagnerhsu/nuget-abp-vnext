@@ -80,7 +80,7 @@ export class ListService<QueryParamsType = ABP.PageQueryParams | any> implements
 
   private _isLoading$ = new BehaviorSubject(false);
 
-  private destroy$ = new Subject();
+  private destroy$ = new Subject<void>();
 
   private delay: MonoTypeOperatorFunction<QueryParamsType>;
 
@@ -106,9 +106,8 @@ export class ListService<QueryParamsType = ABP.PageQueryParams | any> implements
   hookToQuery<T>(
     streamCreatorCallback: QueryStreamCreatorCallback<T, QueryParamsType>,
   ): Observable<PagedResultDto<T>> {
-    this._isLoading$.next(true);
-
     return this.query$.pipe(
+      tap(() => this._isLoading$.next(true)),
       switchMap(query => streamCreatorCallback(query).pipe(catchError(() => of(null)))),
       filter(Boolean),
       tap(() => this._isLoading$.next(false)),
