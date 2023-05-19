@@ -1,6 +1,6 @@
 # Migrating from IdentityServer to OpenIddict Step by Step Guide
 
-This guide provides layer-by-layer guidance for migrating your existing application to [OpenIddict](https://github.com/openiddict/openiddict-core) from IdentityServer. ABP startup templates use `OpenIddict` OpenId provider from v6.0.0-rc1 by default and `IdentityServer` projects are renamed to `AuthServer` in tiered/separated solutions. Since OpenIddict is only available with ABP v6.0, you will need to update your existing application in order to apply OpenIddict changes.
+This guide provides layer-by-layer guidance for migrating your existing application to [OpenIddict](https://github.com/openiddict/openiddict-core) from IdentityServer. ABP startup templates use `OpenIddict` OpenId provider from v6.0.0 by default and `IdentityServer` projects are renamed to `AuthServer` in tiered/separated solutions. Since OpenIddict is only available with ABP v6.0, you will need to update your existing application in order to apply OpenIddict changes.
 
 ## History
 We are not removing Identity Server packages and we will continue to release new versions of IdentityServer-related NuGet/NPM packages. That means you won't have an issue while upgrading to v6.0 when the stable version releases. We will continue to fix bugs in our packages for a while. ABP 7.0 will be based on .NET 7. If Identity Server continues to work with .NET 7, we will also continue to ship NuGet packages for our IDS integration.
@@ -19,62 +19,68 @@ Use the `abp update` command to update your existing application. See [Upgrading
 ### Domain.Shared Layer
 
 - In **MyApplication.Domain.Shared.csproj** replace **project reference**:
-  ```csharp
-  <PackageReference Include="Volo.Abp.IdentityServer.Domain.Shared" Version="6.0.0-rc.5" />
-  ```
+
+```csharp
+<PackageReference Include="Volo.Abp.IdentityServer.Domain.Shared" Version="6.0.*" />
+```
+
   with   
-  ```csharp
-  <PackageReference Include="Volo.Abp.OpenIddict.Domain.Shared" Version="6.0.0-rc.5" />
-  ```
+
+```csharp
+<PackageReference Include="Volo.Abp.OpenIddict.Domain.Shared" Version="6.0.*" />
+```
 
 - In **MyApplicationDomainSharedModule.cs** replace usings and **module dependencies:**
 
-  ```csharp
-  using Volo.Abp.IdentityServer;
-  ...
-  typeof(AbpIdentityServerDomainSharedModule)
-  ```
+```csharp
+using Volo.Abp.IdentityServer;
+...
+typeof(AbpIdentityServerDomainSharedModule)
+```
+
   with 
-  ```csharp
-  using Volo.Abp.OpenIddict;
-  ...
-  typeof(AbpOpenIddictDomainSharedModule)
+
+```csharp
+using Volo.Abp.OpenIddict;
+...
+typeof(AbpOpenIddictDomainSharedModule)
+```
 
 ### Domain Layer
 
 - In **MyApplication.Domain.csproj** replace **project references**:
 
-  ```csharp
-  <PackageReference Include="Volo.Abp.IdentityServer.Domain" Version="6.0.0-rc.5" />
-  <PackageReference Include="Volo.Abp.PermissionManagement.Domain.IdentityServer" Version="6.0.0-rc.5" />
-  ```
+```csharp
+<PackageReference Include="Volo.Abp.IdentityServer.Domain" Version="6.0.*" />
+<PackageReference Include="Volo.Abp.PermissionManagement.Domain.IdentityServer" Version="6.0.*" />
+```
 
   with   
 
-  ```csharp
-  <PackageReference Include="Volo.Abp.OpenIddict.Domain" Version="6.0.0-rc.5" />
-  <PackageReference Include="Volo.Abp.PermissionManagement.Domain.OpenIddict" Version="6.0.0-rc.5" />
-  ```
+```csharp
+<PackageReference Include="Volo.Abp.OpenIddict.Domain" Version="6.0.*" />
+<PackageReference Include="Volo.Abp.PermissionManagement.Domain.OpenIddict" Version="6.0.*" />
+```
 
 - In **MyApplicationDomainModule.cs** replace usings and **module dependencies**:
 
-  ```csharp
-  using Volo.Abp.IdentityServer;
-  using Volo.Abp.PermissionManagement.IdentityServer;
-  ...
-  typeof(AbpIdentityServerDomainModule),
-  typeof(AbpPermissionManagementDomainIdentityServerModule),
-  ```
+```csharp
+using Volo.Abp.IdentityServer;
+using Volo.Abp.PermissionManagement.IdentityServer;
+...
+typeof(AbpIdentityServerDomainModule),
+typeof(AbpPermissionManagementDomainIdentityServerModule),
+```
 
   with 
 
-  ```csharp
-  using Volo.Abp.OpenIddict;
-  using Volo.Abp.PermissionManagement.OpenIddict;
-  ...
-  typeof(AbpOpenIddictDomainModule),
-  typeof(AbpPermissionManagementDomainOpenIddictModule),
-  ```
+```csharp
+using Volo.Abp.OpenIddict;
+using Volo.Abp.PermissionManagement.OpenIddict;
+...
+typeof(AbpOpenIddictDomainModule),
+typeof(AbpPermissionManagementDomainOpenIddictModule),
+```
 
 #### OpenIddictDataSeedContributor
 
@@ -90,30 +96,30 @@ If you are using MongoDB, skip this step and check the *MongoDB* layer section.
 - In **MyApplication.EntityFrameworkCore.csproj** replace **project reference**:
 
   ```csharp
-  <PackageReference Include="Volo.Abp.IdentityServer.EntityFrameworkCore" Version="6.0.0-rc.5" />
+  <PackageReference Include="Volo.Abp.IdentityServer.EntityFrameworkCore" Version="6.0.*" />
   ```
 
   with   
 
   ```csharp
-  <PackageReference Include="Volo.Abp.OpenIddict.EntityFrameworkCore" Version="6.0.0-rc.5" />
+  <PackageReference Include="Volo.Abp.OpenIddict.EntityFrameworkCore" Version="6.0.*" />
   ```
 
 - In **MyApplicationEntityFrameworkCoreModule.cs** replace usings and **module dependencies**:
 
-  ```csharp
-  using Volo.Abp.IdentityServer.EntityFrameworkCore;
-  ...
-  typeof(AbpIdentityServerEntityFrameworkCoreModule),
-  ```
+```csharp
+using Volo.Abp.IdentityServer.EntityFrameworkCore;
+...
+typeof(AbpIdentityServerEntityFrameworkCoreModule),
+```
 
   with 
 
-  ```csharp
-  using Volo.Abp.OpenIddict.EntityFrameworkCore;
-  ...
-  typeof(AbpOpenIddictEntityFrameworkCoreModule),
-  ```
+```csharp
+using Volo.Abp.OpenIddict.EntityFrameworkCore;
+...
+typeof(AbpOpenIddictEntityFrameworkCoreModule),
+```
 
 - In **MyApplicationDbContext.cs** replace usings and **fluent api configurations**:
 
@@ -154,30 +160,30 @@ If you are using EntityFrameworkCore, skip this step and check the *EntityFramew
 - In **MyApplication.MongoDB.csproj** replace **project reference**:
 
   ```csharp
-  <PackageReference Include="Volo.Abp.IdentityServer.MongoDB" Version="6.0.0-rc.5" />
+  <PackageReference Include="Volo.Abp.IdentityServer.MongoDB" Version="6.0.*" />
   ```
 
   with   
 
   ```csharp
-  <PackageReference Include="Volo.Abp.OpenIddict.MongoDB" Version="6.0.0-rc.5" />
+  <PackageReference Include="Volo.Abp.OpenIddict.MongoDB" Version="6.0.*" />
   ```
 
 - In **MyApplicationMongoDbModule.cs** replace usings and **module dependencies**:
 
-  ```csharp
-  using Volo.Abp.IdentityServer.MongoDB;
-  ...
-  typeof(AbpIdentityServerMongoDbModule),
-  ```
+```csharp
+using Volo.Abp.IdentityServer.MongoDB;
+...
+typeof(AbpIdentityServerMongoDbModule),
+```
 
   with 
 
-  ```csharp
-  using Volo.Abp.OpenIddict.MongoDB;
-  ...
-  typeof(AbpOpenIddictMongoDbModule),
-  ```
+```csharp
+using Volo.Abp.OpenIddict.MongoDB;
+...
+typeof(AbpOpenIddictMongoDbModule),
+```
 
 ### DbMigrator Project
 
@@ -251,7 +257,7 @@ for creating the host builder.
 
 ## Source code of samples and module
 
-* [Open source tiered & separate auth server application migrate Identity Server to OpenIddct](https://github.com/abpframework/abp-samples/tree/master/Ids2OpenId)
+* [Open source tiered & separate auth server application migrate Identity Server to OpenIddict](https://github.com/abpframework/abp-samples/tree/master/Ids2OpenId)
 * [OpenIddict module document](https://docs.abp.io/en/abp/6.0/Modules/OpenIddict)
 * [OpenIddict module source code](https://github.com/abpframework/abp/tree/rel-6.0/modules/openiddict)
 

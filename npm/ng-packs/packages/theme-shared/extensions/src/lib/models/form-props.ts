@@ -9,6 +9,7 @@ import {
   PropContributorCallback,
   PropContributorCallbacks,
   PropData,
+  PropDisplayTextResolver,
   PropList,
   PropPredicate,
   Props,
@@ -17,7 +18,7 @@ import {
 
 export class FormPropList<R = any> extends PropList<R, FormProp<R>> {}
 
-export class FormProps<R = any> extends Props<FormPropList<R>> {
+export class FormProps<R = any> extends Props<PropList<R, FormProp<R>>> {
   protected _ctor: Type<FormPropList<R>> = FormPropList;
 }
 
@@ -45,7 +46,7 @@ export class GroupedFormPropList<R = any> {
 }
 
 export interface GroupedFormPropItem {
-  group: FormPropGroup;
+  group?: FormPropGroup;
   formPropList: FormPropList;
 }
 
@@ -69,13 +70,14 @@ export class FormProp<R = any> extends Prop<R> {
   readonly template?: Type<any>;
   readonly className?: string;
   readonly group?: FormPropGroup | undefined;
+  readonly displayTextResolver?: PropDisplayTextResolver<R>;
 
   constructor(options: FormPropOptions<R>) {
     super(
       options.type,
       options.name,
-      options.displayName,
-      options.permission,
+      options.displayName || '',
+      options.permission || '',
       options.visible,
       options.isExtra,
       options.template,
@@ -92,7 +94,8 @@ export class FormProp<R = any> extends Prop<R> {
     this.options = options.options;
     this.id = options.id || options.name;
     const defaultValue = options.defaultValue;
-    this.defaultValue = isFalsyValue(defaultValue) ? defaultValue : defaultValue || null;
+    this.defaultValue = isFalsyValue(defaultValue) ? (defaultValue as number) : defaultValue || '';
+    this.displayTextResolver = options.displayTextResolver;
   }
 
   static create<R = any>(options: FormPropOptions<R>) {
@@ -128,6 +131,7 @@ export type FormPropOptions<R = any> = O.Optional<
   | 'defaultValue'
   | 'options'
   | 'id'
+  | 'displayTextResolver'
 >;
 
 export type CreateFormPropDefaults<R = any> = Record<string, FormProp<R>[]>;
@@ -137,6 +141,6 @@ export type EditFormPropDefaults<R = any> = Record<string, FormProp<R>[]>;
 export type EditFormPropContributorCallback<R = any> = PropContributorCallback<FormPropList<R>>;
 export type EditFormPropContributorCallbacks<R = any> = PropContributorCallbacks<FormPropList<R>>;
 
-function isFalsyValue(defaultValue: FormProp['defaultValue']): boolean {
+function isFalsyValue(defaultValue?: FormProp['defaultValue']): boolean {
   return [0, '', false].indexOf(defaultValue as any) > -1;
 }
