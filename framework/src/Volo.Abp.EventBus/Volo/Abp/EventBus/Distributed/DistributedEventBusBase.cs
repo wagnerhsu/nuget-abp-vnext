@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using Volo.Abp.EventBus.Local;
 using Volo.Abp.Guids;
 using Volo.Abp.MultiTenancy;
 using Volo.Abp.Timing;
@@ -15,6 +17,7 @@ public abstract class DistributedEventBusBase : EventBusBase, IDistributedEventB
     protected IGuidGenerator GuidGenerator { get; }
     protected IClock Clock { get; }
     protected AbpDistributedEventBusOptions AbpDistributedEventBusOptions { get; }
+    protected ILocalEventBus LocalEventBus { get; }
 
     protected DistributedEventBusBase(
         IServiceScopeFactory serviceScopeFactory,
@@ -23,8 +26,8 @@ public abstract class DistributedEventBusBase : EventBusBase, IDistributedEventB
         IOptions<AbpDistributedEventBusOptions> abpDistributedEventBusOptions,
         IGuidGenerator guidGenerator,
         IClock clock,
-        IEventHandlerInvoker eventHandlerInvoker
-    ) : base(
+        IEventHandlerInvoker eventHandlerInvoker,
+        ILocalEventBus localEventBus) : base(
         serviceScopeFactory,
         currentTenant,
         unitOfWorkManager,
@@ -33,6 +36,7 @@ public abstract class DistributedEventBusBase : EventBusBase, IDistributedEventB
         GuidGenerator = guidGenerator;
         Clock = clock;
         AbpDistributedEventBusOptions = abpDistributedEventBusOptions.Value;
+        LocalEventBus = localEventBus;
     }
 
     public IDisposable Subscribe<TEvent>(IDistributedEventHandler<TEvent> handler) where TEvent : class
@@ -77,6 +81,13 @@ public abstract class DistributedEventBusBase : EventBusBase, IDistributedEventB
             }
         }
 
+        await TriggerDistributedEventSentAsync(new DistributedEventSent()
+        {
+            Source = DistributedEventSource.Direct,
+            EventName = EventNameAttribute.GetNameOrDefault(eventType),
+            EventData = eventData
+        });
+
         await PublishToEventBusAsync(eventType, eventData);
     }
 
@@ -94,7 +105,7 @@ public abstract class DistributedEventBusBase : EventBusBase, IDistributedEventB
         IncomingEventInfo incomingEvent,
         InboxConfig inboxConfig);
 
-    private async Task<bool> AddToOutboxAsync(Type eventType, object eventData)
+    protected virtual async Task<bool> AddToOutboxAsync(Type eventType, object eventData)
     {
         var unitOfWork = UnitOfWorkManager.Current;
         if (unitOfWork == null)
@@ -102,13 +113,22 @@ public abstract class DistributedEventBusBase : EventBusBase, IDistributedEventB
             return false;
         }
 
-        foreach (var outboxConfig in AbpDistributedEventBusOptions.Outboxes.Values)
+        foreach (var outboxConfig in AbpDistributedEventBusOptions.Outboxes.Values.OrderBy(x => x.Selector is null))
         {
             if (outboxConfig.Selector == null || outboxConfig.Selector(eventType))
             {
-                var eventOutbox =
-                    (IEventOutbox)unitOfWork.ServiceProvider.GetRequiredService(outboxConfig.ImplementationType);
+                var eventOutbox = (IEventOutbox)unitOfWork.ServiceProvider.GetRequiredService(outboxConfig.ImplementationType);
                 var eventName = EventNameAttribute.GetNameOrDefault(eventType);
+
+                await OnAddToOutboxAsync(eventName, eventType, eventData);
+
+                await TriggerDistributedEventSentAsync(new DistributedEventSent()
+                {
+                    Source = DistributedEventSource.Direct,
+                    EventName = eventName,
+                    EventData = eventData
+                });
+
                 await eventOutbox.EnqueueAsync(
                     new OutgoingEventInfo(
                         GuidGenerator.Create(),
@@ -124,11 +144,16 @@ public abstract class DistributedEventBusBase : EventBusBase, IDistributedEventB
         return false;
     }
 
+    protected virtual Task OnAddToOutboxAsync(string eventName, Type eventType, object eventData)
+    {
+        return Task.CompletedTask;
+    }
+
     protected async Task<bool> AddToInboxAsync(
         string messageId,
         string eventName,
         Type eventType,
-        byte[] eventBytes)
+        object eventData)
     {
         if (AbpDistributedEventBusOptions.Inboxes.Count <= 0)
         {
@@ -137,7 +162,7 @@ public abstract class DistributedEventBusBase : EventBusBase, IDistributedEventB
 
         using (var scope = ServiceScopeFactory.CreateScope())
         {
-            foreach (var inboxConfig in AbpDistributedEventBusOptions.Inboxes.Values)
+            foreach (var inboxConfig in AbpDistributedEventBusOptions.Inboxes.Values.OrderBy(x => x.EventSelector is null))
             {
                 if (inboxConfig.EventSelector == null || inboxConfig.EventSelector(eventType))
                 {
@@ -152,12 +177,19 @@ public abstract class DistributedEventBusBase : EventBusBase, IDistributedEventB
                         }
                     }
 
+                    await TriggerDistributedEventReceivedAsync(new DistributedEventReceived
+                    {
+                        Source = DistributedEventSource.Direct,
+                        EventName = EventNameAttribute.GetNameOrDefault(eventType),
+                        EventData = eventData
+                    });
+
                     await eventInbox.EnqueueAsync(
                         new IncomingEventInfo(
                             GuidGenerator.Create(),
                             messageId,
                             eventName,
-                            eventBytes,
+                            Serialize(eventData),
                             Clock.Now
                         )
                     );
@@ -169,4 +201,52 @@ public abstract class DistributedEventBusBase : EventBusBase, IDistributedEventB
     }
 
     protected abstract byte[] Serialize(object eventData);
+
+    protected virtual async Task TriggerHandlersDirectAsync(Type eventType, object eventData)
+    {
+        await TriggerDistributedEventReceivedAsync(new DistributedEventReceived
+        {
+            Source = DistributedEventSource.Direct,
+            EventName = EventNameAttribute.GetNameOrDefault(eventType),
+            EventData = eventData
+        });
+
+        await TriggerHandlersAsync(eventType, eventData);
+    }
+
+    protected virtual async Task TriggerHandlersFromInboxAsync(Type eventType, object eventData, List<Exception> exceptions, InboxConfig inboxConfig = null)
+    {
+        await TriggerDistributedEventReceivedAsync(new DistributedEventReceived
+        {
+            Source = DistributedEventSource.Inbox,
+            EventName = EventNameAttribute.GetNameOrDefault(eventType),
+            EventData = eventData
+        });
+
+        await TriggerHandlersAsync(eventType, eventData, exceptions, inboxConfig);
+    }
+
+    public virtual async Task TriggerDistributedEventSentAsync(DistributedEventSent distributedEvent)
+    {
+        try
+        {
+            await LocalEventBus.PublishAsync(distributedEvent);
+        }
+        catch (Exception _)
+        {
+            // ignored
+        }
+    }
+
+    public virtual async Task TriggerDistributedEventReceivedAsync(DistributedEventReceived distributedEvent)
+    {
+        try
+        {
+            await LocalEventBus.PublishAsync(distributedEvent);
+        }
+        catch (Exception _)
+        {
+            // ignored
+        }
+    }
 }

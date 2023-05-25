@@ -1,9 +1,8 @@
 import { CommonModule } from '@angular/common';
-import { HttpClientModule, HttpClientXsrfModule, HTTP_INTERCEPTORS } from '@angular/common/http';
+import { HttpClientModule, HttpClientXsrfModule } from '@angular/common/http';
 import { APP_INITIALIZER, Injector, ModuleWithProviders, NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
-import { OAuthModule, OAuthStorage } from 'angular-oauth2-oidc';
 import { AbstractNgModelComponent } from './abstracts/ng-model.component';
 import { DynamicLayoutComponent } from './components/dynamic-layout.component';
 import { ReplaceableRouteContainerComponent } from './components/replaceable-route-container.component';
@@ -16,9 +15,7 @@ import { InitDirective } from './directives/init.directive';
 import { PermissionDirective } from './directives/permission.directive';
 import { ReplaceableTemplateDirective } from './directives/replaceable-template.directive';
 import { StopPropagationDirective } from './directives/stop-propagation.directive';
-import { OAuthConfigurationHandler } from './handlers/oauth-configuration.handler';
 import { RoutesHandler } from './handlers/routes.handler';
-import { ApiInterceptor } from './interceptors/api.interceptor';
 import { LocalizationModule } from './localization.module';
 import { ABP } from './models/common';
 import { LocalizationPipe } from './pipes/localization.pipe';
@@ -27,9 +24,9 @@ import { ToInjectorPipe } from './pipes/to-injector.pipe';
 import { CookieLanguageProvider } from './providers/cookie-language.provider';
 import { LocaleProvider } from './providers/locale.provider';
 import { LocalizationService } from './services/localization.service';
-import { oAuthStorage } from './strategies/auth-flow.strategy';
+import { OTHERS_GROUP } from './tokens';
 import { localizationContributor, LOCALIZATIONS } from './tokens/localization.token';
-import { coreOptionsFactory, CORE_OPTIONS } from './tokens/options.token';
+import { CORE_OPTIONS, coreOptionsFactory } from './tokens/options.token';
 import { TENANT_KEY } from './tokens/tenant-key.token';
 import { noop } from './utils/common-utils';
 import './utils/date-extensions';
@@ -37,10 +34,10 @@ import { getInitialData, localeInitializer } from './utils/initial-utils';
 import { ShortDateTimePipe } from './pipes/short-date-time.pipe';
 import { ShortTimePipe } from './pipes/short-time.pipe';
 import { ShortDatePipe } from './pipes/short-date.pipe';
-
-export function storageFactory(): OAuthStorage {
-  return oAuthStorage;
-}
+import { SafeHtmlPipe } from './pipes/safe-html.pipe';
+import { QUEUE_MANAGER } from './tokens/queue.token';
+import { DefaultQueueManager } from './utils/queue';
+import { IncludeLocalizationResourcesProvider } from './providers/include-localization-resources.provider';
 
 /**
  * BaseCoreModule is the module that holds
@@ -49,61 +46,61 @@ export function storageFactory(): OAuthStorage {
  * This module will be imported and exported by all others.
  */
 @NgModule({
-    exports: [
-        CommonModule,
-        HttpClientModule,
-        FormsModule,
-        ReactiveFormsModule,
-        RouterModule,
-        LocalizationModule,
-        AbstractNgModelComponent,
-        AutofocusDirective,
-        DynamicLayoutComponent,
-        ForDirective,
-        FormSubmitDirective,
-        InitDirective,
-        InputEventDebounceDirective,
-        PermissionDirective,
-        ReplaceableRouteContainerComponent,
-        ReplaceableTemplateDirective,
-        RouterOutletComponent,
-        SortPipe,
-        StopPropagationDirective,
-        ToInjectorPipe,
-        ShortDateTimePipe,
-        ShortTimePipe,
-        ShortDatePipe
-    ],
-    imports: [
-        OAuthModule,
-        CommonModule,
-        HttpClientModule,
-        FormsModule,
-        ReactiveFormsModule,
-        RouterModule,
-        LocalizationModule,
-    ],
-    declarations: [
-        AbstractNgModelComponent,
-        AutofocusDirective,
-        DynamicLayoutComponent,
-        ForDirective,
-        FormSubmitDirective,
-        InitDirective,
-        InputEventDebounceDirective,
-        PermissionDirective,
-        ReplaceableRouteContainerComponent,
-        ReplaceableTemplateDirective,
-        RouterOutletComponent,
-        SortPipe,
-        StopPropagationDirective,
-        ToInjectorPipe,
-        ShortDateTimePipe,
-        ShortTimePipe,
-        ShortDatePipe
-
-    ],
-    providers: [LocalizationPipe]
+  exports: [
+    CommonModule,
+    HttpClientModule,
+    FormsModule,
+    ReactiveFormsModule,
+    RouterModule,
+    LocalizationModule,
+    AbstractNgModelComponent,
+    AutofocusDirective,
+    DynamicLayoutComponent,
+    ForDirective,
+    FormSubmitDirective,
+    InitDirective,
+    InputEventDebounceDirective,
+    PermissionDirective,
+    ReplaceableRouteContainerComponent,
+    ReplaceableTemplateDirective,
+    RouterOutletComponent,
+    SortPipe,
+    SafeHtmlPipe,
+    StopPropagationDirective,
+    ToInjectorPipe,
+    ShortDateTimePipe,
+    ShortTimePipe,
+    ShortDatePipe,
+  ],
+  imports: [
+    CommonModule,
+    HttpClientModule,
+    FormsModule,
+    ReactiveFormsModule,
+    RouterModule,
+    LocalizationModule,
+  ],
+  declarations: [
+    AbstractNgModelComponent,
+    AutofocusDirective,
+    DynamicLayoutComponent,
+    ForDirective,
+    FormSubmitDirective,
+    InitDirective,
+    InputEventDebounceDirective,
+    PermissionDirective,
+    ReplaceableRouteContainerComponent,
+    ReplaceableTemplateDirective,
+    RouterOutletComponent,
+    SortPipe,
+    SafeHtmlPipe,
+    StopPropagationDirective,
+    ToInjectorPipe,
+    ShortDateTimePipe,
+    ShortTimePipe,
+    ShortDatePipe,
+  ],
+  providers: [LocalizationPipe],
 })
 export class BaseCoreModule {}
 
@@ -116,7 +113,6 @@ export class BaseCoreModule {}
   imports: [
     BaseCoreModule,
     LocalizationModule,
-    OAuthModule.forRoot(),
     HttpClientXsrfModule.withOptions({
       cookieName: 'XSRF-TOKEN',
       headerName: 'RequestVerificationToken',
@@ -149,17 +145,6 @@ export class CoreModule {
           deps: ['CORE_OPTIONS'],
         },
         {
-          provide: HTTP_INTERCEPTORS,
-          useExisting: ApiInterceptor,
-          multi: true,
-        },
-        {
-          provide: APP_INITIALIZER,
-          multi: true,
-          deps: [OAuthConfigurationHandler],
-          useFactory: noop,
-        },
-        {
           provide: APP_INITIALIZER,
           multi: true,
           deps: [Injector],
@@ -183,7 +168,7 @@ export class CoreModule {
           deps: [RoutesHandler],
           useFactory: noop,
         },
-        { provide: OAuthStorage, useFactory: storageFactory },
+
         { provide: TENANT_KEY, useValue: options.tenantKey || '__tenant' },
         {
           provide: LOCALIZATIONS,
@@ -191,6 +176,15 @@ export class CoreModule {
           useValue: localizationContributor(options.localizations),
           deps: [LocalizationService],
         },
+        {
+          provide: QUEUE_MANAGER,
+          useClass: DefaultQueueManager,
+        },
+        {
+          provide: OTHERS_GROUP,
+          useValue: options.othersGroup || 'AbpUi::OthersGroup',
+        },
+        IncludeLocalizationResourcesProvider,
       ],
     };
   }
@@ -208,8 +202,4 @@ export class CoreModule {
       ],
     };
   }
-}
-
-export function ngxsStoragePluginSerialize(data) {
-  return data;
 }

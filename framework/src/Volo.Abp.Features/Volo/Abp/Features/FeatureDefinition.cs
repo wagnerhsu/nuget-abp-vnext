@@ -7,7 +7,7 @@ using Volo.Abp.Validation.StringValues;
 
 namespace Volo.Abp.Features;
 
-public class FeatureDefinition
+public class FeatureDefinition : ICanCreateChildFeature
 {
     /// <summary>
     /// Unique name of the feature.
@@ -100,11 +100,11 @@ public class FeatureDefinition
         bool isVisibleToClients = true,
         bool isAvailableToHost = true)
     {
-        Name = name;
+        Name = Check.NotNullOrWhiteSpace(name, nameof(name));
         DefaultValue = defaultValue;
         DisplayName = displayName ?? new FixedLocalizableString(name);
         Description = description;
-        ValueType = valueType;
+        ValueType = valueType ?? new ToggleStringValueType();
         IsVisibleToClients = isVisibleToClients;
         IsAvailableToHost = isAvailableToHost;
 
@@ -124,7 +124,7 @@ public class FeatureDefinition
     }
 
     /// <summary>
-    /// Sets a property in the <see cref="Properties"/> dictionary.
+    /// Adds one or more providers to the <see cref="AllowedProviders"/> list.
     /// This is a shortcut for nested calls on this object.
     /// </summary>
     public virtual FeatureDefinition WithProviders(params string[] providers)
@@ -176,6 +176,17 @@ public class FeatureDefinition
 
         featureToRemove.Parent = null;
         _children.Remove(featureToRemove);
+    }
+
+    public FeatureDefinition CreateChildFeature(string name,
+        string defaultValue = null,
+        ILocalizableString displayName = null,
+        ILocalizableString description = null,
+        IStringValueType valueType = null,
+        bool isVisibleToClients = true,
+        bool isAvailableToHost = true)
+    {
+        return this.CreateChild(name, defaultValue, displayName, description, valueType, isVisibleToClients, isAvailableToHost);
     }
 
     public override string ToString()

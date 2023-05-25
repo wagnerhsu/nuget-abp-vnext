@@ -7,7 +7,7 @@
     "Clear": "清除",
     "Yes": "是",
     "No": "否",
-    "Ok": "Ok",
+    "Ok": "好",
     "Close": "关闭",
     "Save": "保存",
     "SavingWithThreeDot": "保存中...",
@@ -48,6 +48,7 @@
     "Search": "搜索",
     "ItemWillBeDeletedMessageWithFormat": "{0} 将被删除!",
     "ItemWillBeDeletedMessage": "此项将被删除!",
-    "ManageYourAccount": "管理你的账户"
+    "ManageYourAccount": "管理你的账户",
+    "OthersGroup": "其他"
   }
 }

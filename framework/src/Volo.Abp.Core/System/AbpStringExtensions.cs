@@ -46,6 +46,7 @@ public static class AbpStringExtensions
     /// <summary>
     /// Indicates whether this string is null or an System.String.Empty string.
     /// </summary>
+    [ContractAnnotation("str:null => true")]
     public static bool IsNullOrEmpty(this string str)
     {
         return string.IsNullOrEmpty(str);
@@ -54,6 +55,7 @@ public static class AbpStringExtensions
     /// <summary>
     /// indicates whether this string is null, empty, or consists only of white-space characters.
     /// </summary>
+    [ContractAnnotation("str:null => true")]
     public static bool IsNullOrWhiteSpace(this string str)
     {
         return string.IsNullOrWhiteSpace(str);
@@ -117,6 +119,7 @@ public static class AbpStringExtensions
     /// <param name="str">The string.</param>
     /// <param name="postFixes">one or more postfix.</param>
     /// <returns>Modified string or the same string if it has not any of given postfixes</returns>
+    [ContractAnnotation("null <= str:null")]
     public static string RemovePostFix(this string str, params string[] postFixes)
     {
         return str.RemovePostFix(StringComparison.Ordinal, postFixes);
@@ -129,6 +132,7 @@ public static class AbpStringExtensions
     /// <param name="comparisonType">String comparison type</param>
     /// <param name="postFixes">one or more postfix.</param>
     /// <returns>Modified string or the same string if it has not any of given postfixes</returns>
+    [ContractAnnotation("null <= str:null")]
     public static string RemovePostFix(this string str, StringComparison comparisonType, params string[] postFixes)
     {
         if (str.IsNullOrEmpty())
@@ -158,6 +162,7 @@ public static class AbpStringExtensions
     /// <param name="str">The string.</param>
     /// <param name="preFixes">one or more prefix.</param>
     /// <returns>Modified string or the same string if it has not any of given prefixes</returns>
+    [ContractAnnotation("null <= str:null")]
     public static string RemovePreFix(this string str, params string[] preFixes)
     {
         return str.RemovePreFix(StringComparison.Ordinal, preFixes);
@@ -170,6 +175,7 @@ public static class AbpStringExtensions
     /// <param name="comparisonType">String comparison type</param>
     /// <param name="preFixes">one or more prefix.</param>
     /// <returns>Modified string or the same string if it has not any of given prefixes</returns>
+    [ContractAnnotation("null <= str:null")]
     public static string RemovePreFix(this string str, StringComparison comparisonType, params string[] preFixes)
     {
         if (str.IsNullOrEmpty())
@@ -203,7 +209,22 @@ public static class AbpStringExtensions
             return str;
         }
 
-        return str.Substring(0, pos) + replace + str.Substring(pos + search.Length);
+        var searchLength = search.Length;
+        var replaceLength = replace.Length;
+        var newLength = str.Length - searchLength + replaceLength;
+
+        Span<char> buffer = newLength <= 1024 ? stackalloc char[newLength] : new char[newLength];
+
+        // Copy the part of the original string before the search term
+        str.AsSpan(0, pos).CopyTo(buffer);
+
+        // Copy the replacement text
+        replace.AsSpan().CopyTo(buffer.Slice(pos));
+
+        // Copy the remainder of the original string
+        str.AsSpan(pos + searchLength).CopyTo(buffer.Slice(pos + replaceLength));
+
+        return buffer.ToString();
     }
 
     /// <summary>
@@ -262,6 +283,7 @@ public static class AbpStringExtensions
     /// <param name="useCurrentCulture">set true to use current culture. Otherwise, invariant culture will be used.</param>
     /// <param name="handleAbbreviations">set true to if you want to convert 'XYZ' to 'xyz'.</param>
     /// <returns>camelCase of the string</returns>
+    [ContractAnnotation("null <= str:null")]
     public static string ToCamelCase(this string str, bool useCurrentCulture = false, bool handleAbbreviations = false)
     {
         if (string.IsNullOrWhiteSpace(str))
@@ -288,6 +310,7 @@ public static class AbpStringExtensions
     /// </summary>
     /// <param name="str">String to convert.</param>
     /// <param name="useCurrentCulture">set true to use current culture. Otherwise, invariant culture will be used.</param>
+    [ContractAnnotation("null <= str:null")]
     public static string ToSentenceCase(this string str, bool useCurrentCulture = false)
     {
         if (string.IsNullOrWhiteSpace(str))
@@ -305,6 +328,7 @@ public static class AbpStringExtensions
     /// </summary>
     /// <param name="str">String to convert.</param>
     /// <param name="useCurrentCulture">set true to use current culture. Otherwise, invariant culture will be used.</param>
+    [ContractAnnotation("null <= str:null")]
     public static string ToKebabCase(this string str, bool useCurrentCulture = false)
     {
         if (string.IsNullOrWhiteSpace(str))
@@ -438,6 +462,7 @@ public static class AbpStringExtensions
     /// <param name="str">String to convert</param>
     /// <param name="useCurrentCulture">set true to use current culture. Otherwise, invariant culture will be used.</param>
     /// <returns>PascalCase of the string</returns>
+    [ContractAnnotation("null <= str:null")]
     public static string ToPascalCase(this string str, bool useCurrentCulture = false)
     {
         if (string.IsNullOrWhiteSpace(str))
@@ -456,7 +481,7 @@ public static class AbpStringExtensions
     /// <summary>
     /// Gets a substring of a string from beginning of the string if it exceeds maximum length.
     /// </summary>
-    /// <exception cref="ArgumentNullException">Thrown if <paramref name="str"/> is null</exception>
+    [ContractAnnotation("null <= str:null")]
     public static string Truncate(this string str, int maxLength)
     {
         if (str == null)
@@ -475,7 +500,7 @@ public static class AbpStringExtensions
     /// <summary>
     /// Gets a substring of a string from Ending of the string if it exceeds maximum length.
     /// </summary>
-    /// <exception cref="ArgumentNullException">Thrown if <paramref name="str"/> is null</exception>
+    [ContractAnnotation("null <= str:null")]
     public static string TruncateFromBeginning(this string str, int maxLength)
     {
         if (str == null)
@@ -508,6 +533,7 @@ public static class AbpStringExtensions
     /// Returning string can not be longer than maxLength.
     /// </summary>
     /// <exception cref="ArgumentNullException">Thrown if <paramref name="str"/> is null</exception>
+    [ContractAnnotation("null <= str:null")]
     public static string TruncateWithPostfix(this string str, int maxLength, string postfix)
     {
         if (str == null)

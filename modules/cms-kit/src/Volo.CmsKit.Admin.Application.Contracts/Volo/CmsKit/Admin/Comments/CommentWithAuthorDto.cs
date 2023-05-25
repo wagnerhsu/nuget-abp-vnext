@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using Volo.CmsKit.Users;
 
 namespace Volo.CmsKit.Admin.Comments;
 
@@ -22,4 +20,6 @@ public class CommentWithAuthorDto
     public DateTime CreationTime { get; set; }
 
     public CmsUserDto Author { get; set; }
+    
+    public string Url { get; set; }
 }
