@@ -82,8 +82,8 @@ $(function (){
                                 commentsService
                                     .delete(data.record.id)
                                     .then(function () {
-                                        _dataTable.ajax.reload();
-                                        abp.notify.success(l('SuccessfullyDeleted'));
+                                        _dataTable.ajax.reloadEx();
+                                        abp.notify.success(l('DeletedSuccessfully'));
                                     });
                             }
                         }
@@ -167,11 +167,11 @@ $(function (){
         
         $(inputSelector).val(value);
         
-        _dataTable.ajax.reload();
+        _dataTable.ajax.reloadEx();
     });
 
     filterForm.submit(function (e){
         e.preventDefault();
-        _dataTable.ajax.reload();
+        _dataTable.ajax.reloadEx();
     });
 });

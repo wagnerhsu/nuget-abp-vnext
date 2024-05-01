@@ -13,7 +13,8 @@
     "SavingWithThreeDot": "ذخیره...",
     "Actions": "عملیات",
     "Delete": "حذف",
-    "SuccessfullyDeleted": "با موفقیت حذف شد",
+    "SavedSuccessfully": "با موفقیت ذخیره شد",
+    "DeletedSuccessfully": "با موفقیت حذف شد",
     "Edit": "ویرایش",
     "Refresh": "رفرش",
     "Language": "زبان",
@@ -49,6 +50,8 @@
     "ItemWillBeDeletedMessageWithFormat": "{0} حذف خواهد شد!",
     "ItemWillBeDeletedMessage": "این مورد حذف خواهد شد!",
     "ManageYourAccount": "حساب خود را مدیریت کنید",
-    "OthersGroup": "دیگر"
+    "OthersGroup": "دیگر",
+    "Today": "امروز",
+    "Apply": "درخواست دادن"
   }
 }

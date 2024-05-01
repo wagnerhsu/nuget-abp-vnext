@@ -32,6 +32,10 @@ public class TestAppDbContext : AbpDbContext<TestAppDbContext>, IThirdDbContext,
 
     public DbSet<Product> Products { get; set; }
 
+    public DbSet<Category> Categories { get; set; }
+
+    public DbSet<AppEntityWithNavigations> AppEntityWithNavigations { get; set; }
+
     public TestAppDbContext(DbContextOptions<TestAppDbContext> options)
         : base(options)
     {
@@ -84,6 +88,32 @@ public class TestAppDbContext : AbpDbContext<TestAppDbContext>, IThirdDbContext,
         });
 
         modelBuilder.Entity<Product>();
+
+        modelBuilder.Entity<Category>(b =>
+        {
+            b.HasAbpQueryFilter(e => e.Name.StartsWith("abp"));
+        });
+
+        modelBuilder.Entity<AppEntityWithNavigations>(b =>
+        {
+            b.ConfigureByConvention();
+            b.OwnsOne(v => v.AppEntityWithValueObjectAddress);
+            b.HasOne(x => x.OneToOne).WithOne().HasForeignKey<AppEntityWithNavigationChildOneToOne>(x => x.Id);
+            b.HasMany(x => x.OneToMany).WithOne().HasForeignKey(x => x.AppEntityWithNavigationId);
+            b.HasMany(x => x.ManyToMany).WithMany(x => x.ManyToMany).UsingEntity<AppEntityWithNavigationsAndAppEntityWithNavigationChildManyToMany>();
+        });
+
+        modelBuilder.Entity<AppEntityWithNavigationChildOneToOne>(b =>
+        {
+            b.ConfigureByConvention();
+            b.HasOne(x => x.OneToOne).WithOne().HasForeignKey<AppEntityWithNavigationChildOneToOneAndOneToOne>(x => x.Id);
+        });
+
+        modelBuilder.Entity<AppEntityWithNavigationChildOneToMany>(b =>
+        {
+            b.ConfigureByConvention();
+            b.HasMany(x => x.OneToMany).WithOne().HasForeignKey(x => x.AppEntityWithNavigationChildOneToManyId);
+        });
 
         modelBuilder.TryConfigureObjectExtensions<TestAppDbContext>();
     }

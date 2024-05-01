@@ -4,11 +4,13 @@ This document explains how to integrate MongoDB as a database provider to ABP ba
 
 ## Installation
 
-`Volo.Abp.MongoDB` is the main nuget package for the MongoDB integration. Install it to your project (for a layered application, to your data/infrastructure layer):
+`Volo.Abp.MongoDB` is the main NuGet package for the MongoDB integration. Install it to your project (for a layered application, to your data/infrastructure layer), You can use the [ABP CLI](CLI.md) to install it to your project. Execute the following command in the folder of the .csproj file of the layer:
 
 ```
-Install-Package Volo.Abp.MongoDB
+abp add-package Volo.Abp.MongoDB
 ```
+
+> If you haven't done it yet, you first need to install the [ABP CLI](CLI.md). For other installation options, see [the package description page](https://abp.io/package-detail/Volo.Abp.MongoDB).
 
 Then add `AbpMongoDbModule` module dependency to your [module](Module-Development-Basics.md):
 
@@ -79,6 +81,34 @@ If you only need to configure the collection name, you can also use `[MongoColle
 [MongoCollection("MyQuestions")] //Sets the collection name
 public IMongoCollection<Question> Questions => Collection<Question>();
 ````
+
+### Configure Indexes and CreateCollectionOptions for a Collection
+
+You can configure indexes and `CreateCollectionOptions` for your collections by overriding the `CreateModel` method. Example:
+
+````csharp
+protected override void CreateModel(IMongoModelBuilder modelBuilder)
+{
+    base.CreateModel(modelBuilder);
+
+    modelBuilder.Entity<Question>(b =>
+    {
+        b.CreateCollectionOptions.Collation = new Collation(locale:"en_US", strength: CollationStrength.Secondary);
+        b.ConfigureIndexes(indexes =>
+            {
+                indexes.CreateOne(
+                    new CreateIndexModel<BsonDocument>(
+                        Builders<BsonDocument>.IndexKeys.Ascending("MyProperty"),
+                        new CreateIndexOptions { Unique = true }
+                    )
+                );
+            }
+        );
+    });
+}
+````
+
+This example sets a collation for the collection and creates a unique index for the `MyProperty` property.
 
 ### Configure the Connection String Selection
 
@@ -279,7 +309,7 @@ public class BookService
 
 ### Transactions
 
-MongoDB supports multi-document transactions starting from the version 4.0 and the ABP Framework supports it. However, the [startup template](Startup-templates/Index.md) **disables** transactions by default. If your MongoDB **server** supports transactions, you can enable the it in the *YourProjectMongoDbModule* class:
+MongoDB supports multi-document transactions starting from the version 4.0 and the ABP Framework supports it. However, the [startup template](Startup-Templates/Index.md) **disables** transactions by default. If your MongoDB **server** supports transactions, you can enable the it in the *YourProjectMongoDbModule* class:
 
 ```csharp
 Configure<AbpUnitOfWorkDefaultOptions>(options =>
@@ -480,3 +510,4 @@ public class MyCustomMongoDbBulkOperationProvider
 
 * [Entities](Entities.md)
 * [Repositories](Repositories.md)
+* [Video tutorial](https://abp.io/video-courses/essentials/abp-mongodb)

@@ -10,6 +10,7 @@ public class TenantConfigurationProvider : ITenantConfigurationProvider, ITransi
 {
     protected virtual ITenantResolver TenantResolver { get; }
     protected virtual ITenantStore TenantStore { get; }
+    protected virtual ITenantNormalizer TenantNormalizer { get; }
     protected virtual ITenantResolveResultAccessor TenantResolveResultAccessor { get; }
     protected virtual IStringLocalizer<AbpMultiTenancyResource> StringLocalizer { get; }
 
@@ -17,15 +18,17 @@ public class TenantConfigurationProvider : ITenantConfigurationProvider, ITransi
         ITenantResolver tenantResolver,
         ITenantStore tenantStore,
         ITenantResolveResultAccessor tenantResolveResultAccessor,
-        IStringLocalizer<AbpMultiTenancyResource> stringLocalizer)
+        IStringLocalizer<AbpMultiTenancyResource> stringLocalizer,
+        ITenantNormalizer tenantNormalizer)
     {
         TenantResolver = tenantResolver;
         TenantStore = tenantStore;
+        TenantNormalizer = tenantNormalizer;
         TenantResolveResultAccessor = tenantResolveResultAccessor;
         StringLocalizer = stringLocalizer;
     }
 
-    public virtual async Task<TenantConfiguration> GetAsync(bool saveResolveResult = false)
+    public virtual async Task<TenantConfiguration?> GetAsync(bool saveResolveResult = false)
     {
         var resolveResult = await TenantResolver.ResolveTenantIdOrNameAsync();
 
@@ -34,7 +37,7 @@ public class TenantConfigurationProvider : ITenantConfigurationProvider, ITransi
             TenantResolveResultAccessor.Result = resolveResult;
         }
 
-        TenantConfiguration tenant = null;
+        TenantConfiguration? tenant = null;
         if (resolveResult.TenantIdOrName != null)
         {
             tenant = await FindTenantAsync(resolveResult.TenantIdOrName);
@@ -61,7 +64,7 @@ public class TenantConfigurationProvider : ITenantConfigurationProvider, ITransi
         return tenant;
     }
 
-    protected virtual async Task<TenantConfiguration> FindTenantAsync(string tenantIdOrName)
+    protected virtual async Task<TenantConfiguration?> FindTenantAsync(string tenantIdOrName)
     {
         if (Guid.TryParse(tenantIdOrName, out var parsedTenantId))
         {
@@ -69,7 +72,7 @@ public class TenantConfigurationProvider : ITenantConfigurationProvider, ITransi
         }
         else
         {
-            return await TenantStore.FindAsync(tenantIdOrName);
+            return await TenantStore.FindAsync(TenantNormalizer.NormalizeName(tenantIdOrName)!);
         }
     }
 }

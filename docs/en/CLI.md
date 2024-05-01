@@ -48,8 +48,9 @@ Here, is the list of all available commands before explaining their details:
 * **`logout`**: Logouts from your computer if you've authenticated before.
 * **`bundle`**: Generates script and style references for ABP Blazor and MAUI Blazor project. 
 * **`install-libs`**: Install NPM Packages for MVC / Razor Pages and Blazor Server UI types.
-* **`clear-download-cache`** Clears the templates download cache.
-
+* **`clear-download-cache`**: Clears the templates download cache.
+* **`trust-version`**: Trusts the user's version and does not check if the version exists or not. If the template with the given version is found in the cache, it will be used, otherwise throws an exception.
+ 
 ### help
 
 Shows basic usages of the ABP CLI.
@@ -419,7 +420,7 @@ abp remove-proxy -t csharp --folder MyProxies/InnerFolder
 
 ### switch-to-preview
 
-You can use this command to switch your project to latest preview version of the ABP framework.
+You can use this command to switch your solution or project to latest preview version of the ABP framework.
 
 Usage:
 
@@ -429,12 +430,12 @@ abp switch-to-preview [options]
 
 #### Options
 
-* `--solution-directory` or `-sd`: Specifies the directory. The solution should be in that directory or in any of its sub directories. If not specified, default is the current directory.
+* `--directory` or `-d`: Specifies the directory. The solution or project should be in that directory or in any of its sub directories. If not specified, default is the current directory.
 
 
 ### switch-to-nightly
 
-You can use this command to switch your project to latest [nightly](Nightly-Builds.md) preview version of the ABP framework packages.
+You can use this command to switch your solution or project to latest [nightly](Nightly-Builds.md) preview version of the ABP framework packages.
 
 Usage:
 
@@ -444,7 +445,7 @@ abp switch-to-nightly [options]
 
 #### Options
 
-* `--solution-directory` or `-sd`: Specifies the directory. The solution should be in that directory or in any of its sub directories. If not specified, default is the current directory.
+* `--directory` or `-d`: Specifies the directory. The solution or project should be in that directory or in any of its sub directories. If not specified, default is the current directory.
 
 ### switch-to-stable
 
@@ -457,7 +458,7 @@ abp switch-to-stable [options]
 ````
 #### Options
 
-* `--solution-directory` or `-sd`: Specifies the directory. The solution should be in that directory or in any of its sub directories. If not specified, default is the current directory.
+* `--directory` or `-d`: Specifies the directory. The solution or project should be in that directory or in any of its sub directories. If not specified, default is the current directory.
 
 ### switch-to-local
 
@@ -526,6 +527,16 @@ Then review changes on your source control system to be sure that it has changed
 ##### Additional Options
 
 * `--file` or `-f`: Default: `abp-translation.json`. The translation file (use only if you've used the `--output` option before).
+
+#### Online DeepL translate
+
+The `translate` command also supports online translation. You need to provide your [DeepL Authentication Key](https://support.deepl.com/hc/en-us/articles/360020695820-Authentication-Key).
+
+It will search all the `en.json(reference-culture)` files in the directory and sub-directory and then translate and generate the corresponding `zh-Hans.json(culture)` files.
+
+````bash
+abp translate -c zh-Hans --online --deepl-auth-key <auth-key>
+````
 
 ### login
 
@@ -598,3 +609,4 @@ abp install-libs [options]
 ## See Also
 
 * [Examples for the new command](CLI-New-Command-Samples.md)
+* [Video tutorial](https://abp.io/video-courses/essentials/abp-cli)

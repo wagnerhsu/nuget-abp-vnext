@@ -1,19 +1,25 @@
 import { Injectable, inject } from '@angular/core';
-import { UrlTree, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
-import { HttpErrorResponse } from '@angular/common/http';
+import {
+  UrlTree,
+  ActivatedRouteSnapshot,
+  RouterStateSnapshot,
+  CanActivateFn,
+} from '@angular/router';
 
-import { Observable, delay, of, tap } from 'rxjs';
+import { Observable } from 'rxjs';
 import { OAuthService } from 'angular-oauth2-oidc';
 
-import { AuthService, HttpErrorReporterService, IAbpGuard } from '@abp/ng.core';
+import { AuthService, IAbpGuard } from '@abp/ng.core';
 
+/**
+ * @deprecated Use `abpOAuthGuard` *function* instead.
+ */
 @Injectable({
   providedIn: 'root',
 })
 export class AbpOAuthGuard implements IAbpGuard {
   protected readonly oAuthService = inject(OAuthService);
   protected readonly authService = inject(AuthService);
-  protected readonly httpErrorReporter = inject(HttpErrorReporterService);
 
   canActivate(
     route: ActivatedRouteSnapshot,
@@ -24,13 +30,26 @@ export class AbpOAuthGuard implements IAbpGuard {
       return true;
     }
 
-    return of(false).pipe(
-      tap(() => this.httpErrorReporter.reportError({ status: 401 } as HttpErrorResponse)),
-      delay(1500),
-      tap(() => {
-        const params = { returnUrl: state.url };
-        this.authService.navigateToLogin(params);
-      }),
-    );
+    const params = { returnUrl: state.url };
+    this.authService.navigateToLogin(params);
+    return false;
   }
 }
+
+export const abpOAuthGuard: CanActivateFn = (
+  route: ActivatedRouteSnapshot,
+  state: RouterStateSnapshot,
+) => {
+  const oAuthService = inject(OAuthService);
+  const authService = inject(AuthService);
+
+  const hasValidAccessToken = oAuthService.hasValidAccessToken();
+
+  if (hasValidAccessToken) {
+    return true;
+  }
+
+  const params = { returnUrl: state.url };
+  authService.navigateToLogin(params);
+  return false;
+};

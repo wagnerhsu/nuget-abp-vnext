@@ -13,7 +13,7 @@ if (-Not $Version) {
 }
 
 if (-Not $Registry) {
-  $Registry = "http://0.0.0.0:4873/";
+  $Registry = "https://registry.npmjs.org";
 }
 
 $PacksPublishCommand = "npm run lerna -- exec 'npm publish --registry $Registry'"
@@ -25,7 +25,7 @@ if ($IsPrerelease) {
 }
 
 $commands = (
-  "npm run lerna -- version $Version --yes --no-commit-hooks --skip-git --force-publish",
+  "npm run lerna -- version $Version --yes --no-commit-hooks --no-git-tag-version --no-push --force-publish",
   "yarn replace-with-tilde",
   "cd scripts",
   "yarn install",

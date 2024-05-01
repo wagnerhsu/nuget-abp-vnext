@@ -1,11 +1,11 @@
-# Getting Started with the React Native
-
 ```json
 //[doc-params]
 {
-	"Tiered": ["No", "Yes"]
+  "Tiered": ["No", "Yes"]
 }
 ```
+
+# Getting Started with the React Native
 
 ABP platform provide basic [React Native](https://reactnative.dev/) startup template to develop mobile applications **integrated to your ABP based backends**.
 
@@ -36,17 +36,9 @@ abp new MyCompanyName.MyProjectName -csf -u <angular or mvc> -m react-native
 
 This command will prepare a solution with an **Angular** or an **MVC** (depends on your choice), a **.NET Core**, and a **React Native** project in it.
 
-### 2. Direct Download
+### 2. Generating a CLI Command from Get Started Page
 
-You may [download a solution scaffold directly on ABP.io](https://abp.io/get-started) if you are more comfortable with GUI or simply want to try ABP without installing the CLI.
-
-Please do the following:
-
-1. Click on the "DIRECT DOWNLOAD" tab.
-2. Fill out the short form about your project.
-3. Click on the "Create now" button.
-
-...and a customized download will start in a few seconds.
+You can generate a CLI command on the [get started page of the abp.io website](https://abp.io/get-started). Then, use the command on your terminal to create a new [Startup Template](./Startup-Templates/Index.md).
 
 ## How to Configure & Run the Backend
 
@@ -54,42 +46,22 @@ Please do the following:
 
 > When you are using OpenIddict, You should remove 'clientSecret' on Environment.js (if exists) and disable "HTTPS-only" settings. (Openiddict has default since Version 6.0)
 
-### How to disable Https-only in Openiddict.
-
-You should add this code on {{ if Tiered == "No" }}`MyProjectNameHttpApiHostModule`{{ else if Tiered == "Yes" }}`MyProjectNameAuthServerModule`{{ end }}.
-
-```csharp
-  public override void PreConfigureServices(ServiceConfigurationContext context)
-    {
-        #if DEBUG
-            PreConfigure<OpenIddictServerBuilder>(options =>
-            {
-                options
-                    .UseAspNetCore()
-                    .DisableTransportSecurityRequirement();
-            });
-        #endif
-        //....
-    }
-
-```
-
 A React Native application running on an Android emulator or a physical phone **can not connect to the backend** on `localhost`. To fix this problem, it is necessary to run the backend application on your **local IP address**.
 
 {{ if Tiered == "No"}}
 ![React Native host project local IP entry](images/rn-host-local-ip.png)
 
--   Open the `appsettings.json` file in the `.HttpApi.Host` folder. Replace the `localhost` address on the `SelfUrl` and `Authority` properties with your local IP address.
--   Open the `launchSettings.json` file in the `.HttpApi.Host/Properties` folder. Replace the `localhost` address on the `applicationUrl` properties with your local IP address.
+- Open the `appsettings.json` file in the `.HttpApi.Host` folder. Replace the `localhost` address on the `SelfUrl` and `Authority` properties with your local IP address.
+- Open the `launchSettings.json` file in the `.HttpApi.Host/Properties` folder. Replace the `localhost` address on the `applicationUrl` properties with your local IP address.
 
 {{ else if Tiered == "Yes" }}
 
 ![React Native tiered project local IP entry](images/rn-tiered-local-ip.png)
 
--   Open the `appsettings.json` file in the `.AuthServer` folder. Replace the `localhost` address on the `SelfUrl` property with your local IP address.
--   Open the `launchSettings.json` file in the `.AuthServer/Properties` folder. Replace the `localhost` address on the `applicationUrl` properties with your local IP address.
--   Open the `appsettings.json` file in the `.HttpApi.Host` folder. Replace the `localhost` address on the `Authority` property with your local IP address.
--   Open the `launchSettings.json` file in the `.HttpApi.Host/Properties` folder. Replace the `localhost` address on the `applicationUrl` properties with your local IP address.
+- Open the `appsettings.json` file in the `.AuthServer` folder. Replace the `localhost` address on the `SelfUrl` property with your local IP address.
+- Open the `launchSettings.json` file in the `.AuthServer/Properties` folder. Replace the `localhost` address on the `applicationUrl` properties with your local IP address.
+- Open the `appsettings.json` file in the `.HttpApi.Host` folder. Replace the `localhost` address on the `Authority` property with your local IP address.
+- Open the `launchSettings.json` file in the `.HttpApi.Host/Properties` folder. Replace the `localhost` address on the `applicationUrl` properties with your local IP address.
 
 {{ end }}
 
@@ -99,13 +71,14 @@ Run the backend application as described in the [getting started document](Getti
 
 ## How to disable the Https-only settings of OpenIddict
 
-Go to MyProjectNameHttpApiHostModule.cs under the host project. And put these codes under the `PreConfigureServices` function.
+Open the {{ if Tiered == "No" }}`MyProjectNameHttpApiHostModule`{{ else if Tiered == "Yes" }}`MyProjectNameAuthServerModule`{{ end }} project and copy-paste the below code-block to the `PreConfigureServices` method:
 
 ```csharp
 #if DEBUG
-    PreConfigure<OpenIddictServerBuilder>(options => {
-    options.UseAspNetCore()
-    .DisableTransportSecurityRequirement();
+    PreConfigure<OpenIddictServerBuilder>(options =>
+    {
+        options.UseAspNetCore()
+            .DisableTransportSecurityRequirement();
     });
 #endif
 ```
@@ -136,7 +109,16 @@ Go to MyProjectNameHttpApiHostModule.cs under the host project. And put these co
 
 In the above image, you can start the application with an Android emulator, an iOS simulator or a physical phone by scanning the QR code with the [Expo Client](https://expo.io/tools#client) or choosing the option.
 
+### Expo
+
 ![React Native login screen on iPhone 11](images/rn-login-iphone.png)
+
+### Android Studio
+
+1. Start the emulator in **Android Studio** before running the `yarn start` or `npm start` command.
+2. Press **a** to open in Android Studio.
+
+![React Native login screen on iPhone 11](images/rn-login-android-studio.png)
 
 Enter **admin** as the username and **1q2w3E\*** as the password to login to the application.
 
@@ -144,4 +126,4 @@ The application is up and running. You can continue to develop your application 
 
 ## See Also
 
--   [React Native project structure](./Startup-Templates/Application#react-native)
+- [React Native project structure](./Startup-Templates/Application#react-native)
