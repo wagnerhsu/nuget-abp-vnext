@@ -53,6 +53,7 @@ The comment system provides a commenting [widget](../../UI/AspNetCore/Widgets.md
 {
   entityType = "Product",
   entityId = "...",
+  isReadOnly = false,
   referralLinks  = new [] {"nofollow"}
 })
 ```
@@ -78,6 +79,12 @@ You can view and manage comments on this page.
 You can also view and manage replies on this page.
 
 ![comments-detail](../../images/cmskit-module-comments-detail.png)
+
+## Settings
+
+You can configure the approval status of comments using the "Comment" tab under the "Cms" section on the Settings page. When this feature is enabled, you can approve and reject comments. In this way, users can only see the comments that you approve. By default, this feature is set to "false."
+
+![comments-settings](../../images/cmskit-module-comments-settings.png)
 
 ## Internals
 

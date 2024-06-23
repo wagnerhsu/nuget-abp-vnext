@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using JetBrains.Annotations;
 using Volo.Abp;
@@ -47,7 +48,7 @@ public static class AbpStringExtensions
     /// Indicates whether this string is null or an System.String.Empty string.
     /// </summary>
     [ContractAnnotation("str:null => true")]
-    public static bool IsNullOrEmpty(this string str)
+    public static bool IsNullOrEmpty([System.Diagnostics.CodeAnalysis.NotNullWhen(false)]this string? str)
     {
         return string.IsNullOrEmpty(str);
     }
@@ -56,7 +57,7 @@ public static class AbpStringExtensions
     /// indicates whether this string is null, empty, or consists only of white-space characters.
     /// </summary>
     [ContractAnnotation("str:null => true")]
-    public static bool IsNullOrWhiteSpace(this string str)
+    public static bool IsNullOrWhiteSpace([System.Diagnostics.CodeAnalysis.NotNullWhen(false)]this string? str)
     {
         return string.IsNullOrWhiteSpace(str);
     }
@@ -352,64 +353,7 @@ public static class AbpStringExtensions
     /// <returns></returns>
     public static string ToSnakeCase(this string str)
     {
-        if (string.IsNullOrWhiteSpace(str))
-        {
-            return str;
-        }
-
-        var builder = new StringBuilder(str.Length + Math.Min(2, str.Length / 5));
-        var previousCategory = default(UnicodeCategory?);
-
-        for (var currentIndex = 0; currentIndex < str.Length; currentIndex++)
-        {
-            var currentChar = str[currentIndex];
-            if (currentChar == '_')
-            {
-                builder.Append('_');
-                previousCategory = null;
-                continue;
-            }
-
-            var currentCategory = char.GetUnicodeCategory(currentChar);
-            switch (currentCategory)
-            {
-                case UnicodeCategory.UppercaseLetter:
-                case UnicodeCategory.TitlecaseLetter:
-                    if (previousCategory == UnicodeCategory.SpaceSeparator ||
-                        previousCategory == UnicodeCategory.LowercaseLetter ||
-                        previousCategory != UnicodeCategory.DecimalDigitNumber &&
-                        previousCategory != null &&
-                        currentIndex > 0 &&
-                        currentIndex + 1 < str.Length &&
-                        char.IsLower(str[currentIndex + 1]))
-                    {
-                        builder.Append('_');
-                    }
-
-                    currentChar = char.ToLower(currentChar);
-                    break;
-
-                case UnicodeCategory.LowercaseLetter:
-                case UnicodeCategory.DecimalDigitNumber:
-                    if (previousCategory == UnicodeCategory.SpaceSeparator)
-                    {
-                        builder.Append('_');
-                    }
-                    break;
-
-                default:
-                    if (previousCategory != null)
-                    {
-                        previousCategory = UnicodeCategory.SpaceSeparator;
-                    }
-                    continue;
-            }
-
-            builder.Append(currentChar);
-            previousCategory = currentCategory;
-        }
-
-        return builder.ToString();
+        return str.IsNullOrWhiteSpace() ? str : JsonNamingPolicy.SnakeCaseLower.ConvertName(str);
     }
 
     /// <summary>
@@ -482,7 +426,7 @@ public static class AbpStringExtensions
     /// Gets a substring of a string from beginning of the string if it exceeds maximum length.
     /// </summary>
     [ContractAnnotation("null <= str:null")]
-    public static string Truncate(this string str, int maxLength)
+    public static string? Truncate(this string? str, int maxLength)
     {
         if (str == null)
         {
@@ -501,7 +445,7 @@ public static class AbpStringExtensions
     /// Gets a substring of a string from Ending of the string if it exceeds maximum length.
     /// </summary>
     [ContractAnnotation("null <= str:null")]
-    public static string TruncateFromBeginning(this string str, int maxLength)
+    public static string? TruncateFromBeginning(this string? str, int maxLength)
     {
         if (str == null)
         {
@@ -522,7 +466,7 @@ public static class AbpStringExtensions
     /// Returning string can not be longer than maxLength.
     /// </summary>
     /// <exception cref="ArgumentNullException">Thrown if <paramref name="str"/> is null</exception>
-    public static string TruncateWithPostfix(this string str, int maxLength)
+    public static string? TruncateWithPostfix(this string? str, int maxLength)
     {
         return TruncateWithPostfix(str, maxLength, "...");
     }
@@ -534,7 +478,7 @@ public static class AbpStringExtensions
     /// </summary>
     /// <exception cref="ArgumentNullException">Thrown if <paramref name="str"/> is null</exception>
     [ContractAnnotation("null <= str:null")]
-    public static string TruncateWithPostfix(this string str, int maxLength, string postfix)
+    public static string? TruncateWithPostfix(this string? str, int maxLength, string postfix)
     {
         if (str == null)
         {

@@ -197,7 +197,7 @@ In addition, `.HttpApi.Client.ConsoleTestApp` is a console application (not an a
 Test projects are prepared for integration testing;
 
 * It is fully integrated into the ABP framework and all services in your application.
-* It uses SQLite in-memory database for EF Core. For MongoDB, it uses the [Mongo2Go](https://github.com/Mongo2Go/Mongo2Go) library.
+* It uses SQLite in-memory database for EF Core. For MongoDB, it uses the [EphemeralMongo](https://github.com/asimmon/ephemeral-mongo) library.
 * Authorization is disabled, so any application service can be easily used in tests.
 
 You can still create unit tests for your classes which will be harder to write (because you will need to prepare mock/fake objects), but faster to run (because it only tests a single class and skips all the initialization processes).
@@ -261,6 +261,19 @@ You should run the application with the given order:
 * Then run the `.HttpApi.Host` since it is used by the `.Web` application.
 * Finally, you can run the `.Web` project and login to the application (using `admin` as the username and `1q2w3E*` as the password).
 
+### Blazor UI
+If you choose `Blazor` as the UI Framework (using the `-u blazor` or `-u blazor-server` option), the solution will have a project named `.Blazor`. This project contains the Blazor UI application. According to your choice, it will be a Blazor WebAssembly or Blazor Server application. If Blazor WebAssembly is selected, the solution will also have a `.HttpApi.Host`. This project is an ASP.NET Core application that hosts the backend application for the Blazor single page application.
+
+#### .Blazor Project (Server)
+The Blazor Server project is similar to the ASP.NET Core MVC project. It replaces `.Web` project with `.Blazor` in the solution structure above. It has the same folder structure and the same application flow. Since it's an ASP.NET Core application, it can contain **.cshtml** files and **.razor** components at the same time. If routing matches a razor component, the Blazor UI will be used. Otherwise, the request will be handled by the MVC framework.
+
+![abp solution structure blazor server](../images/layered-project-dependencies-blazor-server.png)
+
+#### .Blazor Project (WebAssembly)
+The Blazor WebAssembly project is a single page application that runs on the browser. You'll see it as `.Blazor` project in the solution. It uses the `.HttpApi.Host` project to communicate with the backend. It can't be used without the backend application. It contains only **.razor** components. It's a pure client-side application. It doesn't have any server-side code. Everything in this layer will be for the client side.
+
+![abp solution structure blazor wasm](../images/layered-project-dependencies-blazor-wasm.png)
+
 ### Angular UI
 
 If you choose `Angular` as the UI framework (using the `-u angular` option), the solution is being separated into two folders:
@@ -303,7 +316,7 @@ You should add `routes` property in the `data` object to add a link on the menu 
 {
    path: 'dashboard',
    loadChildren: () => import('./dashboard/dashboard.module').then(m => m.DashboardModule),
-   canActivate: [AuthGuard, PermissionGuard],
+   canActivate: [authGuard, permissionGuard],
    data: {
       routes: {
          name: 'ProjectName::Menu:Dashboard',
@@ -315,8 +328,8 @@ You should add `routes` property in the `data` object to add a link on the menu 
 }
 ```
 In the above example;
-*  If the user is not logged in, AuthGuard blocks access and redirects to the login page.
-*  PermissionGuard checks the user's permission with the `requiredPolicy` property of the `routes` object. If the user is not authorized to access the page, the 403 page appears.
+*  If the user is not logged in, authGuard blocks access and redirects to the login page.
+*  permissionGuard checks the user's permission with the `requiredPolicy` property of the `routes` object. If the user is not authorized to access the page, the 403 page appears.
 *  The `name` property of `routes` is the menu link label. A localization key can be defined.
 *  The `iconClass` property of the `routes` object is the menu link icon class.
 *  The `requiredPolicy` property of the `routes` object is the required policy key to access the page.
@@ -446,3 +459,6 @@ If you want to configure social/external logins for your application, please fol
 
 - [The getting started document](../Getting-Started.md) explains how to create a new application in a few minutes.
 - [The application development tutorial](../Tutorials/Part-1.md) explains step by step application development.
+
+## See Also
+* [Video tutorial](https://abp.io/video-courses/essentials/app-template)

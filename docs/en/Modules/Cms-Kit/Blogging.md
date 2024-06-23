@@ -29,7 +29,16 @@ A screenshot from the new blog creation modal:
 
 ![blogs-edit](../../images/cmskit-module-blogs-edit.png)
 
-**Slug** is the URL part of the blog. For this example, the root URL of the blog becomes *https://your-domain.com/blogs/technical-blog/*.
+**Slug** is the URL part of the blog. For this example, the root URL of the blog becomes `your-domain.com/blogs/technical-blog/`.
+
+- You can change the default slug by using `CmsBlogsWebConsts.BlogRoutePrefix` constant. For example, if you set it to `foo`, the root URL of the blog becomes `your-domain.com/foo/technical-blog/`.
+
+    ```csharp
+    public override void PreConfigureServices(ServiceConfigurationContext context)
+    {
+        CmsBlogsWebConsts.BlogsRoutePrefix = "foo";
+    }
+    ```
 
 #### Blog Features
 
@@ -119,3 +128,7 @@ This module follows the [Domain Services Best Practices & Conventions](https://d
 - CmsBlogs
 - CmsBlogPosts
 - CmsBlogFeatures
+
+## Entity Extensions
+
+Check the ["Entity Extensions" section of the CMS Kit Module documentation](Index.md#entity-extensions) to see how to extend entities of the Blogging Feature of the CMS Kit module.

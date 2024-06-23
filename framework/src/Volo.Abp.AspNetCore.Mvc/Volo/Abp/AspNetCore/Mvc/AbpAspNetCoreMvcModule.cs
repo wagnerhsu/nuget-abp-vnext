@@ -14,6 +14,7 @@ using System.Linq;
 using System.Net;
 using System.Reflection;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Mvc.Abstractions;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.AspNetCore.Mvc.DataAnnotations;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -25,9 +26,11 @@ using Volo.Abp.ApiVersioning;
 using Volo.Abp.Application;
 using Volo.Abp.AspNetCore.Mvc.AntiForgery;
 using Volo.Abp.AspNetCore.Mvc.ApiExploring;
+using Volo.Abp.AspNetCore.Mvc.ApplicationModels;
 using Volo.Abp.AspNetCore.Mvc.Conventions;
 using Volo.Abp.AspNetCore.Mvc.DataAnnotations;
 using Volo.Abp.AspNetCore.Mvc.DependencyInjection;
+using Volo.Abp.AspNetCore.Mvc.Infrastructure;
 using Volo.Abp.AspNetCore.Mvc.Json;
 using Volo.Abp.AspNetCore.Mvc.Localization;
 using Volo.Abp.AspNetCore.VirtualFileSystem;
@@ -175,6 +178,7 @@ public class AbpAspNetCoreMvcModule : AbpModule
         context.Services.Replace(ServiceDescriptor.Singleton<IValidationAttributeAdapterProvider, AbpValidationAttributeAdapterProvider>());
         context.Services.AddSingleton<ValidationAttributeAdapterProvider>();
 
+        context.Services.TryAddEnumerable(ServiceDescriptor.Transient<IActionDescriptorProvider, AbpMvcActionDescriptorProvider>());
         context.Services.AddOptions<MvcOptions>()
             .Configure<IServiceProvider>((mvcOptions, serviceProvider) =>
             {
@@ -201,6 +205,8 @@ public class AbpAspNetCoreMvcModule : AbpModule
         {
             options.DisableModule("abp");
         });
+
+        context.Services.Replace(ServiceDescriptor.Singleton<IHttpResponseStreamWriterFactory, AbpMemoryPoolHttpResponseStreamWriterFactory>());
     }
 
     public override void PostConfigureServices(ServiceConfigurationContext context)
@@ -209,6 +215,17 @@ public class AbpAspNetCoreMvcModule : AbpModule
             context.Services.GetSingletonInstance<ApplicationPartManager>(),
             context.Services.GetSingletonInstance<IModuleContainer>()
         );
+
+        var preConfigureActions = context.Services.GetPreConfigureActions<AbpAspNetCoreMvcOptions>();
+
+        DynamicProxyIgnoreTypes.Add(preConfigureActions.Configure()
+            .ConventionalControllers
+            .ConventionalControllerSettings.SelectMany(x => x.ControllerTypes).ToArray());
+
+        Configure<AbpAspNetCoreMvcOptions>(options =>
+        {
+            preConfigureActions.Configure(options);
+        });
     }
 
     public override void OnApplicationInitialization(ApplicationInitializationContext context)
@@ -224,18 +241,16 @@ public class AbpAspNetCoreMvcModule : AbpModule
             return;
         }
 
-        //Plugin modules
-        var moduleAssemblies = context
-            .ServiceProvider
-            .GetRequiredService<IModuleContainer>()
+        var moduleContainer = context.ServiceProvider.GetRequiredService<IModuleContainer>();
+
+        var plugInModuleAssemblies = moduleContainer
             .Modules
             .Where(m => m.IsLoadedAsPlugIn)
-            .Select(m => m.Type.Assembly)
+            .SelectMany(m => m.AllAssemblies)
             .Distinct();
 
-        AddToApplicationParts(partManager, moduleAssemblies);
+        AddToApplicationParts(partManager, plugInModuleAssemblies);
 
-        //Controllers for application services
         var controllerAssemblies = context
             .ServiceProvider
             .GetRequiredService<IOptions<AbpAspNetCoreMvcOptions>>()
@@ -246,6 +261,13 @@ public class AbpAspNetCoreMvcModule : AbpModule
             .Distinct();
 
         AddToApplicationParts(partManager, controllerAssemblies);
+
+        var additionalAssemblies = moduleContainer
+            .Modules
+            .SelectMany(m => m.GetAdditionalAssemblies())
+            .Distinct();
+
+        AddToApplicationParts(partManager, additionalAssemblies);
     }
 
     private static void AddToApplicationParts(ApplicationPartManager partManager, IEnumerable<Assembly> moduleAssemblies)

@@ -10,7 +10,7 @@ namespace Volo.Abp.AspNetCore.Mvc.Security.Headers;
 
 public class SecurityHeadersTestController_Tests : AspNetCoreMvcTestBase
 {
-    protected override void ConfigureServices(HostBuilderContext context, IServiceCollection services)
+    protected override void ConfigureServices(IServiceCollection services)
     {
         services.Configure<AbpSecurityHeadersOptions>(options =>
         {
@@ -18,7 +18,7 @@ public class SecurityHeadersTestController_Tests : AspNetCoreMvcTestBase
             options.Headers["Referrer-Policy"] = "no-referrer";
         });
 
-        base.ConfigureServices(context, services);
+        base.ConfigureServices(services);
     }
 
     [Fact]
@@ -29,7 +29,6 @@ public class SecurityHeadersTestController_Tests : AspNetCoreMvcTestBase
         responseMessage.Headers.ShouldContain(x => x.Key == "X-XSS-Protection" & x.Value.First().ToString() == "1; mode=block");
         responseMessage.Headers.ShouldContain(x => x.Key == "X-Frame-Options" & x.Value.First().ToString() == "SAMEORIGIN");
         responseMessage.Headers.ShouldContain(x => x.Key == "X-Content-Type-Options" & x.Value.First().ToString() == "nosniff");
-        responseMessage.Headers.ShouldContain(x => x.Key == "Content-Security-Policy" & x.Value.First().ToString() == "object-src 'none'; form-action 'self'; frame-ancestors 'none'");
     }
 
     [Fact]

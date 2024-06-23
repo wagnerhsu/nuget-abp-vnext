@@ -13,7 +13,8 @@
     "SavingWithThreeDot": "Er að vista...",
     "Actions": "Aðgerðir",
     "Delete": "Eyða",
-    "SuccessfullyDeleted": "Tókst að eyða",
+    "SavedSuccessfully": "Tókst að vista",
+    "DeletedSuccessfully": "Tókst að eyða",
     "Edit": "Breyta",
     "Refresh": "Endurhlaða",
     "Language": "Tungumál",
@@ -49,6 +50,14 @@
     "ItemWillBeDeletedMessageWithFormat": "{0} verður eytt!",
     "ItemWillBeDeletedMessage": "Þessum lið verður eytt!",
     "ManageYourAccount": "Stillingar notandaaðgangs",
-    "OthersGroup": "Annað"
+    "OthersGroup": "Annað",
+    "Today": "Í dag",
+    "Apply": "Sækja um",
+    "InternetConnectionInfo": "Ekki var hægt að framkvæma aðgerðina. Nettengingin þín er ekki tiltæk í augnablikinu.",
+    "CopiedToTheClipboard": "Afritað á klippiborðið",
+    "AddNew": "Bæta við nýju",
+    "ProfilePicture": "Forsíðumynd",
+    "Theme": "Þema",
+    "NotAssigned": "Ekki skráður"
   }
 }

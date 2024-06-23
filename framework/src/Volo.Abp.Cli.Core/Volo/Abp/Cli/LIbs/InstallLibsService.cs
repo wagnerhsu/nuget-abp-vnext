@@ -107,7 +107,7 @@ public class InstallLibsService : IInstallLibsService, ITransientDependency
     {
         return Directory.GetFiles(directory, "*.csproj", SearchOption.AllDirectories)
             .Union(Directory.GetFiles(directory, "angular.json", SearchOption.AllDirectories))
-            .Where(file => ExcludeDirectory.All(x => file.IndexOf(x, StringComparison.OrdinalIgnoreCase) == -1))
+            .Where(file => ExcludeDirectory.All(x => file.IndexOf(x + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase) == -1))
             .Where(file =>
             {
                 if (file.EndsWith(".csproj"))
@@ -120,7 +120,10 @@ public class InstallLibsService : IInstallLibsService, ITransientDependency
 
                     using (var reader = File.OpenText(file))
                     {
-                        return reader.ReadToEnd().Contains("Microsoft.NET.Sdk.Web");
+                        var fileTexts = reader.ReadToEnd();
+                        return fileTexts.Contains("Microsoft.NET.Sdk.Web") ||
+                               fileTexts.Contains("Microsoft.NET.Sdk.Razor") ||
+                               fileTexts.Contains("Microsoft.NET.Sdk.BlazorWebAssembly");
                     }
                 }
                 return true;
