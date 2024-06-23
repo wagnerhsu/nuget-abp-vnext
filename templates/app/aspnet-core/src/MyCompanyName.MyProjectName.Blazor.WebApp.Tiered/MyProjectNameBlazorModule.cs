@@ -16,6 +16,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.OpenApi.Models;
 using MyCompanyName.MyProjectName.Blazor.WebApp.Tiered.Client;
+using MyCompanyName.MyProjectName.Blazor.WebApp.Tiered.Client.Menus;
 using MyCompanyName.MyProjectName.Blazor.WebApp.Tiered.Components;
 using MyCompanyName.MyProjectName.Blazor.WebApp.Tiered.Menus;
 using MyCompanyName.MyProjectName.Localization;
@@ -23,7 +24,7 @@ using MyCompanyName.MyProjectName.MultiTenancy;
 using StackExchange.Redis;
 using Volo.Abp;
 using Volo.Abp.AspNetCore.Authentication.OpenIdConnect;
-using Volo.Abp.AspNetCore.Components.Server;
+using Volo.Abp.AspNetCore.Components.Web;
 using Volo.Abp.AspNetCore.Components.Server.LeptonXLiteTheme;
 using Volo.Abp.AspNetCore.Components.Server.LeptonXLiteTheme.Bundling;
 using Volo.Abp.AspNetCore.Components.Web.Theming.Routing;
@@ -155,7 +156,7 @@ public class MyProjectNameBlazorModule : AbpModule
                 {
                     bundle.AddFiles("/blazor-global-styles.css");
                     //You can remove the following line if you don't use Blazor CSS isolation for components
-                    bundle.AddFiles("/MyCompanyName.MyProjectName.Blazor.WebApp.Tiered.Client.styles.css");
+                    bundle.AddFiles(new BundleFile("/MyCompanyName.MyProjectName.Blazor.WebApp.Tiered.Client.styles.css", true));
                 }
             );
         });
