@@ -27,7 +27,6 @@ enum ValueTypes {
 }
 
 @Component({
-  standalone: true,
   selector: 'abp-feature-management',
   templateUrl: './feature-management.component.html',
   exportAs: 'abpFeatureManagement',
@@ -56,6 +55,9 @@ export class FeatureManagementComponent
 
   @Input()
   providerName: string;
+
+  @Input({ required: false })
+  providerTitle: string;
 
   selectedGroupDisplayName: string;
 

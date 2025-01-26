@@ -6,11 +6,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
-using System.Reflection;
 using System.Text;
-using System.Text.Json;
 using System.Text.RegularExpressions;
-using System.Threading;
 using System.Threading.Tasks;
 using NuGet.Versioning;
 using Volo.Abp.Cli.GitHub;
@@ -294,7 +291,7 @@ public class AbpIoSourceCodeStore : ISourceCodeStore, ITransientDependency
                 var result = await response.Content.ReadAsStringAsync();
                 var versions = JsonSerializer.Deserialize<GithubReleaseVersions>(result);
 
-                return templateName.Contains("LeptonX") ?
+                return (templateName.Contains("LeptonX") || templateName.Contains("lepton-x")) ?
                     versions.LeptonXVersions.Any(v => v.Name == version) :
                     versions.FrameworkAndCommercialVersions.Any(v => v.Name == version);
             }
