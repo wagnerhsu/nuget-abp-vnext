@@ -686,6 +686,10 @@
     "Permission:RedisManagement": "Redis Management",
     "UserCleanUp": "User Clean Up",
     "Permission:UserCleanUp": "User Clean Up",
-    "AllowPrivateQuestion": "Allow Private Question"
+    "AllowPrivateQuestion": "Allow Private Question",
+    "Permission:Campaigns": "Campaigns",
+    "Permission:Licenses": "License Settings",
+    "BlockUserPolicy": "User Block Policies",
+    "Permission:BlockUserPolicy": "User Block Policy"
   }
 }
