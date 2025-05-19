@@ -99,6 +99,7 @@ $projects = (
     "framework/src/Volo.Abp.AspNetCore.Authentication.OpenIdConnect",
     "framework/src/Volo.Abp.AspNetCore.Abstractions",
     "framework/src/Volo.Abp.AspNetCore",
+    "framework/src/Volo.Abp.AspNetCore.Bundling",
     "framework/src/Volo.Abp.AspNetCore.Mvc.Dapr",
     "framework/src/Volo.Abp.AspNetCore.Mvc.Dapr.EventBus",
     "framework/src/Volo.Abp.AspNetCore.Components",
@@ -111,6 +112,7 @@ $projects = (
     "framework/src/Volo.Abp.AspNetCore.Components.WebAssembly.Theming.Bundling",
     "framework/src/Volo.Abp.AspNetCore.Components.Server",
     "framework/src/Volo.Abp.AspNetCore.Components.Server.Theming",
+    "framework/src/Volo.Abp.AspNetCore.Components.MauiBlazor.Bundling",
     "framework/src/Volo.Abp.AspNetCore.Components.MauiBlazor.Theming",
     "framework/src/Volo.Abp.AspNetCore.Components.MauiBlazor.Theming.Bundling",
     "framework/src/Volo.Abp.AspNetCore.MultiTenancy",
@@ -155,6 +157,7 @@ $projects = (
     "framework/src/Volo.Abp.BlobStoring.Minio",
     "framework/src/Volo.Abp.BlobStoring.Aws",
     "framework/src/Volo.Abp.BlobStoring.Google",
+    "framework/src/Volo.Abp.BlobStoring.Bunny",
     "framework/src/Volo.Abp.Caching",
     "framework/src/Volo.Abp.Caching.StackExchangeRedis",
     "framework/src/Volo.Abp.Castle.Core",
@@ -441,6 +444,7 @@ $projects = (
     "source-code/Volo.Abp.Users.SourceCode",
 
     # modules/virtual-file-explorer
+    "modules/virtual-file-explorer/src/Volo.Abp.VirtualFileExplorer.Contracts",
     "modules/virtual-file-explorer/src/Volo.Abp.VirtualFileExplorer.Web",
     "modules/virtual-file-explorer/src/Volo.Abp.VirtualFileExplorer.Installer",
     "source-code/Volo.Abp.VirtualFileExplorer.SourceCode",

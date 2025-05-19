@@ -21,6 +21,15 @@ namespace Volo.Docs.Documents
         
         [JsonPropertyName("isIndex")]
         public bool IsIndex { get; set; }
+        
+        [JsonPropertyName("keywords")]
+        public string[] Keywords { get; set; }
+        
+        [JsonPropertyName("ignoreOnDownload")]
+        public bool IgnoreOnDownload { get; set; }
+        
+        [JsonPropertyName("isInSeries")]
+        public bool IsInSeries { get; set; }
 
         public bool IsLeaf => !HasChildItems;
 

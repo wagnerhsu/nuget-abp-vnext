@@ -1,16 +1,20 @@
 using System;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.RequestLocalization;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.StaticAssets;
+using Microsoft.AspNetCore.Timing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Volo.Abp;
+using Volo.Abp.AspNetCore;
 using Volo.Abp.AspNetCore.Auditing;
 using Volo.Abp.AspNetCore.ExceptionHandling;
 using Volo.Abp.AspNetCore.Security;
@@ -111,7 +115,7 @@ public static class AbpApplicationBuilderExtensions
         return app.UseMiddleware<AbpExceptionHandlingMiddleware>();
     }
 
-    [Obsolete("Replace with AbpClaimsTransformation")]
+    [Obsolete("Use the TransformAbpClaims extension method from IServiceCollection instead.")]
     public static IApplicationBuilder UseAbpClaimsMap(this IApplicationBuilder app)
     {
         return app.UseMiddleware<AbpClaimsMapMiddleware>();
@@ -184,6 +188,27 @@ public static class AbpApplicationBuilderExtensions
             // https://github.com/dotnet/aspnetcore/issues/59673
             app.UseStaticFiles();
 
+            if (!staticAssetsManifestPath.IsNullOrWhiteSpace())
+            {
+                app.ApplicationServices.GetRequiredService<ILogger<AbpAspNetCoreModule>>().LogWarning(
+                    $"The staticAssetsManifestPath({staticAssetsManifestPath}) parameter your provided in MapAbpStaticAssets method is ignored in development mode.");
+            }
+
+            var blazorClientProjectPaths = new[]
+            {
+                Path.Combine(AppContext.BaseDirectory, $"{environment.ApplicationName}.Client.staticwebassets.endpoints.json"),
+                Path.Combine(AppContext.BaseDirectory, $"{environment.ApplicationName.RemovePostFix(".Host")}.Blazor.staticwebassets.endpoints.json"),
+            };
+
+            var blazorClientStaticAssetsManifest = blazorClientProjectPaths.FirstOrDefault(File.Exists);
+            if (blazorClientStaticAssetsManifest != null)
+            {
+                // We have a blazor client project and we need to map the static assets from the client project.
+                var blazorHostStaticAssetsManifest = Path.Combine(AppContext.BaseDirectory, $"{environment.ApplicationName}.staticwebassets.endpoints.json");
+                File.Copy(blazorClientStaticAssetsManifest, blazorHostStaticAssetsManifest, true);
+                return endpoints.MapStaticAssets(blazorHostStaticAssetsManifest);
+            }
+
             // Volo.Abp.AspNetCore.staticwebassets.endpoints.json is an empty file. Just compatible with the return type of MapAbpStaticAssets.
             var tempStaticAssetsManifestPath = Path.Combine(AppContext.BaseDirectory, "Volo.Abp.AspNetCore.staticwebassets.endpoints.json");
             if (!File.Exists(tempStaticAssetsManifestPath))
@@ -244,5 +269,15 @@ public static class AbpApplicationBuilderExtensions
         });
 
         return app;
+    }
+
+    /// <summary>
+    /// Use this middleware after <see cref="UseMultiTenancy" /> middleware.
+    /// </summary>
+    /// <param name="app"></param>
+    /// <returns></returns>
+    public static IApplicationBuilder UseAbpTimeZone(this IApplicationBuilder app)
+    {
+        return app.UseMiddleware<AbpTimeZoneMiddleware>();
     }
 }

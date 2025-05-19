@@ -113,23 +113,6 @@ abp install-libs
 
 > We suggest you install [Yarn v1.22+ (not v2)](https://classic.yarnpkg.com/en/docs/install) to prevent possible package inconsistencies, if you haven't installed it yet.
 
-{{if UI=="Blazor" || UI=="BlazorWebApp" || UI=="MAUIBlazor"}}
-
-#### Bundling and Minification
-
-`abp bundle` command offers bundling and minification support for client-side resources (JavaScript and CSS files) for Blazor projects. This command automatically run when you create a new solution with the [ABP CLI](../../../cli/index.md).
-
-However, sometimes you might need to run this command manually. To update script & style references without worrying about dependencies, ordering, etc. in a project, you can run this command in the directory of your `Blazor.Client` application:
-
-
-````bash
-abp bundle
-````
-
-> For more details about managing style and script references in Blazor or MAUI Blazor apps, see [Managing Global Scripts & Styles](../../../framework/ui/blazor/global-scripts-styles.md).
-
-{{end}}
-
 ### Run the Application
 
 {{if UI=="MVC" || UI=="BlazorServer" || UI=="BlazorWebApp"}}
@@ -545,7 +528,7 @@ The interesting part here is how we communicate with the server. See the *Dynami
 
 ### Index.css
 
-As the final touch, Create a file named `Index.css` in the `Pages` folder of the *TodoApp.Web* project and replace it with the following content:
+As the final touch, Create a file named `Index.css` in the `Pages` folder of the *TodoApp.Web* project and add the following content:
 
 ```css
 #TodoList{
@@ -681,7 +664,7 @@ Open the `Index.razor` file in the `Pages` folder of the {{if UI=="Blazor" || UI
 
 ### Index.razor.css
 
-As the final touch, open the `Index.razor.css` file in the `Pages` folder of the {{if UI=="Blazor" || UI=="BlazorWebApp"}}*TodoApp.Blazor.Client*{{else if UI=="BlazorServer"}} *TodoApp.Blazor* {{else if UI=="MAUIBlazor"}} *TodoApp.MauiBlazor* {{end}} project and replace it with the following content:
+As the final touch, open the `Index.razor.css` file in the `Pages` folder of the {{if UI=="Blazor" || UI=="BlazorWebApp"}}*TodoApp.Blazor.Client*{{else if UI=="BlazorServer"}} *TodoApp.Blazor* {{else if UI=="MAUIBlazor"}} *TodoApp.MauiBlazor* {{end}} project and add the following content:
 
 ```css
 #TodoList{
@@ -844,7 +827,7 @@ Open the `/angular/src/app/home/home.component.html` file and replace its conten
 
 ### home.component.scss
 
-As the final touch, open the `/angular/src/app/home/home.component.scss` file and replace its content with the following code block:
+As the final touch, open the `/angular/src/app/home/home.component.scss` file and add the following code block:
 
 ```css
 #TodoList{
