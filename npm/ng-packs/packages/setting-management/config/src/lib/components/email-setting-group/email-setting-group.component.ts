@@ -1,23 +1,54 @@
 import { NgbModalOptions } from '@ng-bootstrap/ng-bootstrap';
-import { collapse, ToasterService } from '@abp/ng.theme.shared';
+import {
+  ButtonComponent,
+  collapse,
+  ModalCloseDirective,
+  ModalComponent,
+  ToasterService,
+} from '@abp/ng.theme.shared';
 import { Component, inject, OnInit } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
+import {
+  ReactiveFormsModule,
+  UntypedFormBuilder,
+  UntypedFormGroup,
+  Validators,
+} from '@angular/forms';
 import { finalize } from 'rxjs/operators';
 import { SettingManagementPolicyNames } from '../../enums/policy-names';
 import { EmailSettingsService } from '@abp/ng.setting-management/proxy';
 import { EmailSettingsDto } from '../../proxy/models';
-import { ConfigStateService, LocalizationService } from '@abp/ng.core';
+import {
+  ConfigStateService,
+  LocalizationPipe,
+  LocalizationService,
+  PermissionDirective,
+} from '@abp/ng.core';
+import { NgxValidateCoreModule } from '@ngx-validate/core';
+import { CommonModule } from '@angular/common';
 
 const { required, email } = Validators;
 
 @Component({
-  standalone: false,
   selector: 'abp-email-setting-group',
   templateUrl: 'email-setting-group.component.html',
   animations: [collapse],
+  imports: [
+    ReactiveFormsModule,
+    CommonModule,
+    LocalizationPipe,
+    ButtonComponent,
+    ModalComponent,
+    ModalCloseDirective,
+    NgxValidateCoreModule,
+    PermissionDirective,
+  ],
 })
 export class EmailSettingGroupComponent implements OnInit {
+  private emailSettingsService = inject(EmailSettingsService);
+  private fb = inject(UntypedFormBuilder);
+  private toasterService = inject(ToasterService);
+
   protected readonly localizationService = inject(LocalizationService);
   protected readonly configStateSevice = inject(ConfigStateService);
   protected readonly currentUserEmail = toSignal(
@@ -30,12 +61,6 @@ export class EmailSettingGroupComponent implements OnInit {
   emailingPolicy = SettingManagementPolicyNames.Emailing;
   isEmailTestModalOpen = false;
   modalSize: NgbModalOptions = { size: 'lg' };
-
-  constructor(
-    private emailSettingsService: EmailSettingsService,
-    private fb: UntypedFormBuilder,
-    private toasterService: ToasterService,
-  ) {}
 
   ngOnInit() {
     this.getData();

@@ -1,14 +1,14 @@
-import { Injectable, Pipe, PipeTransform } from '@angular/core';
+import { Injectable, Pipe, PipeTransform, inject } from '@angular/core';
 import { LocalizationWithDefault } from '../models/localization';
 import { LocalizationService } from '../services/localization.service';
 
 @Injectable()
 @Pipe({
-  standalone: false,
   name: 'abpLocalization',
 })
 export class LocalizationPipe implements PipeTransform {
-  constructor(private localization: LocalizationService) {}
+  private localization = inject(LocalizationService);
+
 
   transform(
     value: string | LocalizationWithDefault = '',

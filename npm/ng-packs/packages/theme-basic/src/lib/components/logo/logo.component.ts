@@ -1,8 +1,8 @@
 import { ApplicationInfo, EnvironmentService } from '@abp/ng.core';
-import { Component } from '@angular/core';
+import { RouterLink } from '@angular/router';
+import { Component, inject } from '@angular/core';
 
 @Component({
-  standalone: false,
   selector: 'abp-logo',
   template: `
     <a class="navbar-brand" routerLink="/">
@@ -13,11 +13,12 @@ import { Component } from '@angular/core';
       }
     </a>
   `,
+  imports: [RouterLink],
 })
 export class LogoComponent {
+  private environment = inject(EnvironmentService);
+
   get appInfo(): ApplicationInfo {
     return this.environment.getEnvironment().application;
   }
-
-  constructor(private environment: EnvironmentService) {}
 }

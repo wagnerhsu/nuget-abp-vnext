@@ -1,4 +1,4 @@
-import { Component, inject, isDevMode, OnInit, Optional, SkipSelf, Type } from '@angular/core';
+import { Component, inject, isDevMode, OnInit, Type } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { eLayoutType } from '../enums/common';
 import { ABP } from '../models';
@@ -12,9 +12,9 @@ import { findRoute, getRoutePath } from '../utils/route-utils';
 import { TreeNode } from '../utils/tree-utils';
 import { DYNAMIC_LAYOUTS_TOKEN } from '../tokens/dynamic-layout.token';
 import { EnvironmentService } from '../services';
+import { NgComponentOutlet } from '@angular/common';
 
 @Component({
-  standalone: false,
   selector: 'abp-dynamic-layout',
   template: `
     @if (isLayoutVisible) {
@@ -22,6 +22,7 @@ import { EnvironmentService } from '../services';
     }
   `,
   providers: [SubscriptionService],
+  imports: [NgComponentOutlet],
 })
 export class DynamicLayoutComponent implements OnInit {
   layout?: Type<any>;
@@ -38,7 +39,9 @@ export class DynamicLayoutComponent implements OnInit {
   protected readonly routerEvents = inject(RouterEvents);
   protected readonly environment = inject(EnvironmentService);
 
-  constructor(@Optional() @SkipSelf() dynamicLayoutComponent: DynamicLayoutComponent) {
+  constructor() {
+    const dynamicLayoutComponent = inject(DynamicLayoutComponent, { optional: true, skipSelf: true })!;
+
     if (dynamicLayoutComponent) {
       if (isDevMode()) console.warn('DynamicLayoutComponent must be used only in AppComponent.');
       return;

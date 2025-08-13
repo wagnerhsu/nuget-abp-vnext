@@ -1,18 +1,19 @@
 /* eslint-disable @angular-eslint/no-output-native */
-import { ABP } from '@abp/ng.core';
-import {
-  Component,
-  ElementRef,
-  EventEmitter,
-  Input,
-  OnInit,
-  Output,
-  Renderer2,
-  ViewChild,
+import { 
+  Component, 
+  ElementRef, 
+  EventEmitter, 
+  Input, 
+  OnInit, 
+  Output, 
+  Renderer2, 
+  ViewChild, 
+  inject 
 } from '@angular/core';
+import { NgClass } from '@angular/common';
+import { ABP } from '@abp/ng.core';
 
 @Component({
-  standalone: false,
   selector: 'abp-button',
   template: `
     <button
@@ -29,8 +30,11 @@ import {
       <i [ngClass]="icon" class="me-1" aria-hidden="true"></i><ng-content></ng-content>
     </button>
   `,
+  imports: [NgClass],
 })
 export class ButtonComponent implements OnInit {
+  private renderer = inject(Renderer2);
+
   @Input()
   buttonId = '';
 
@@ -73,8 +77,6 @@ export class ButtonComponent implements OnInit {
   get icon(): string {
     return `${this.loading ? 'fa fa-spinner fa-spin' : this.iconClass || 'd-none'}`;
   }
-
-  constructor(private renderer: Renderer2) {}
 
   ngOnInit() {
     if (this.attributes) {

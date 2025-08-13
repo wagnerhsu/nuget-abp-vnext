@@ -1,22 +1,22 @@
-import {
-  AfterViewInit,
-  ChangeDetectionStrategy,
-  ChangeDetectorRef,
-  Component,
-  ElementRef,
-  EventEmitter,
-  Input,
-  OnChanges,
-  OnDestroy,
-  Output,
-  SimpleChanges,
-  ViewChild,
+import { 
+  AfterViewInit, 
+  ChangeDetectionStrategy, 
+  ChangeDetectorRef, 
+  Component, 
+  ElementRef, 
+  EventEmitter, 
+  Input, 
+  OnChanges, 
+  OnDestroy, 
+  Output, 
+  SimpleChanges, 
+  ViewChild, 
+  inject 
 } from '@angular/core';
 
 let Chart: any;
 
 @Component({
-  standalone: false,
   selector: 'abp-chart',
   template: `
     <div
@@ -36,6 +36,9 @@ let Chart: any;
   exportAs: 'abpChart',
 })
 export class ChartComponent implements AfterViewInit, OnDestroy, OnChanges {
+  el = inject(ElementRef);
+  private cdr = inject(ChangeDetectorRef);
+
   @Input() type!: string;
 
   @Input() data: any = {};
@@ -57,11 +60,6 @@ export class ChartComponent implements AfterViewInit, OnDestroy, OnChanges {
   @ViewChild('canvas') canvas!: ElementRef<HTMLCanvasElement>;
 
   chart: any;
-
-  constructor(
-    public el: ElementRef,
-    private cdr: ChangeDetectorRef,
-  ) {}
 
   ngAfterViewInit() {
     import('chart.js/auto').then(module => {

@@ -1,13 +1,12 @@
-import { Directive, Output, EventEmitter, ElementRef, AfterViewInit } from '@angular/core';
+import { Directive, Output, EventEmitter, ElementRef, AfterViewInit, inject } from '@angular/core';
 
 @Directive({
-  standalone: true,
   selector: '[abpInit]',
 })
 export class InitDirective implements AfterViewInit {
-  @Output('abpInit') readonly init = new EventEmitter<ElementRef<any>>();
+  private elRef = inject(ElementRef);
 
-  constructor(private elRef: ElementRef) {}
+  @Output('abpInit') readonly init = new EventEmitter<ElementRef<any>>();
 
   ngAfterViewInit() {
     this.init.emit(this.elRef);

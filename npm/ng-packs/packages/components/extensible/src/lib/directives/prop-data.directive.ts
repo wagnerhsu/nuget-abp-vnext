@@ -1,24 +1,27 @@
 /* eslint-disable @angular-eslint/no-input-rename */
-import {
-  Directive,
-  Injector,
-  Input,
-  OnChanges,
-  OnDestroy,
-  TemplateRef,
-  ViewContainerRef,
+import { 
+  Directive, 
+  Injector, 
+  Input, 
+  OnChanges, 
+  OnDestroy, 
+  TemplateRef, 
+  ViewContainerRef, 
+  inject 
 } from '@angular/core';
 import { PropData, PropList } from '../models/props';
 
 @Directive({
   exportAs: 'abpPropData',
   selector: '[abpPropData]',
-  standalone: true,
 })
 export class PropDataDirective<L extends PropList<any>>
   extends PropData<InferredData<L>>
   implements OnChanges, OnDestroy
 {
+  private tempRef = inject<TemplateRef<any>>(TemplateRef);
+  private vcRef = inject(ViewContainerRef);
+
   @Input('abpPropDataFromList') propList?: L;
 
   @Input('abpPropDataWithRecord') record!: InferredData<L>['record'];
@@ -27,11 +30,9 @@ export class PropDataDirective<L extends PropList<any>>
 
   readonly getInjected: InferredData<L>['getInjected'];
 
-  constructor(
-    private tempRef: TemplateRef<any>,
-    private vcRef: ViewContainerRef,
-    injector: Injector,
-  ) {
+  constructor() {
+    const injector = inject(Injector);
+
     super();
 
     this.getInjected = injector.get.bind(injector);

@@ -192,11 +192,11 @@
               "path": "tutorials/modular-crm/part-01.md"
             },
             {
-              "text": "2: Creating the Initial Products Module",
+              "text": "2: Setting Up the Catalog Module",
               "path": "tutorials/modular-crm/part-02.md"
             },
             {
-              "text": "3: Building the Products Module",
+              "text": "3: Building the Catalog Module",
               "path": "tutorials/modular-crm/part-03.md"
             },
             {
@@ -2127,11 +2127,11 @@
         {
           "text": "Microservice Solution",
           "isLazyExpandable": true,
-          "path": "solution-templates/microservice",
+          "path": "solution-templates/microservice/index.md",
           "items":[
             {
               "text": "Overview",
-              "path": "solution-templates/microservice"
+              "path": "solution-templates/microservice/overview.md"
             },
             {
               "text": "Solution Structure",
@@ -2187,7 +2187,7 @@
                 },
                 {
                   "text": "Swagger integration",
-                  "path": "solution-templates/microservice/swagger.md"
+                  "path": "solution-templates/microservice/swagger-integration.md"
                 },
                 {
                   "text": "Permission management",
