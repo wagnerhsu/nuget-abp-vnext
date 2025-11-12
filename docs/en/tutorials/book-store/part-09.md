@@ -1,3 +1,10 @@
+```json
+//[doc-seo]
+{
+    "Description": "Learn to build a CRUD interface for the Author entity in your web app using ABP Framework, featuring MVC, Blazor, and more!"
+}
+```
+
 # Web Application Development Tutorial - Part 9: Authors: User Interface
 ````json
 //[doc-params]
@@ -601,7 +608,7 @@ This command generates the service proxy for the author service and the related 
 Open the `/src/app/author/author.component.ts` file and replace the content as below:
 
 ```js
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { ListService, PagedResultDto } from '@abp/ng.core';
 import { AuthorService, AuthorDto } from '@proxy/authors';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
@@ -623,12 +630,10 @@ export class AuthorComponent implements OnInit {
 
   selectedAuthor = {} as AuthorDto;
 
-  constructor(
-    public readonly list: ListService,
-    private authorService: AuthorService,
-    private fb: FormBuilder,
-    private confirmation: ConfirmationService
-  ) {}
+  public readonly list = inject(ListService);
+  private readonly authorService = inject(AuthorService);
+  private readonly fb = inject(FormBuilder);
+  private readonly confirmation = inject(ConfirmationService);
 
   ngOnInit(): void {
     const authorStreamCreator = (query) => this.authorService.getList(query);

@@ -1,3 +1,10 @@
+```json
+//[doc-seo]
+{
+    "Description": "Explore Part 2 of our Web Application Development Tutorial, focusing on the Book List Page and leveraging dynamic JavaScript proxies in ABP Framework."
+}
+```
+
 # Web Application Development Tutorial - Part 2: The Book List Page
 ````json
 //[doc-params]
@@ -446,7 +453,7 @@ Open the `/src/app/book/book.component.ts` file and replace the content as below
 
 ```js
 import { ListService, PagedResultDto } from '@abp/ng.core';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { BookService, BookDto } from '@proxy/books';
 
 @Component({
@@ -458,7 +465,8 @@ import { BookService, BookDto } from '@proxy/books';
 export class BookComponent implements OnInit {
   book = { items: [], totalCount: 0 } as PagedResultDto<BookDto>;
 
-  constructor(public readonly list: ListService, private bookService: BookService) {}
+  public readonly list = inject(ListService);
+  private readonly bookService = inject(BookService);
 
   ngOnInit() {
     const bookStreamCreator = (query) => this.bookService.getList(query);
@@ -514,7 +522,7 @@ Now you can see the final result on your browser:
 
 ![Book list final result](images/bookstore-book-list-angular.png)
 
-{{else if UI == "Blazor" || UI == "BlazorServer" || UI == "BlazorWebApp"}}
+{{else if UI == "Blazor" || UI == "BlazorServer" || UI == "BlazorWebApp" || UI == "MAUIBlazor"}}
 
 ## Create a Books Page
 

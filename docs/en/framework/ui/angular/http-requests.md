@@ -1,3 +1,10 @@
+```json
+//[doc-seo]
+{
+    "Description": "Learn how to make efficient HTTP requests in Angular using HttpClient and simplify error handling with HttpInterceptor in your ABP project."
+}
+```
+
 # How to Make HTTP Requests
 
 ## About HttpClient
@@ -31,12 +38,13 @@ In order to use the `RestService`, you must inject it in your class as a depende
 
 ```js
 import { RestService } from '@abp/ng.core';
+import { inject } from '@angular/core';
 
 @Injectable({
   /* class metadata here */
 })
 class DemoService {
-  constructor(private rest: RestService) {}
+  private rest = inject(RestService);
 }
 ```
 

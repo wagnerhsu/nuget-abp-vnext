@@ -1,3 +1,10 @@
+```json
+//[doc-seo]
+{
+    "Description": "Learn how to configure environment variables in ABP Framework applications, including API settings and production configurations."
+}
+```
+
 # Environment
 
 Every application needs some **environment** variables. In Angular world, this is usually managed by `environment.ts`, `environment.prod.ts` and so on. It is the same for ABP as well.
@@ -132,7 +139,8 @@ export const appConfig: ApplicationConfig = {
 In order to use the `EnvironmentService` you must inject it in your class as a dependency.
 
 ```js
-import { EnvironmentService } from '@abp/ng.core';
+import { EnvironmentService } from '@abp/ng.core';
+import { inject } from '@angular/core';
 
 @Component({
   /* class metadata here */

@@ -1,3 +1,10 @@
+```json
+//[doc-seo]
+{
+    "Description": "Learn how to simplify your Angular templates with the ABP `abp-page` component, enhancing code efficiency and structure."
+}
+```
+
 # Page Component
 
 ABP provides a component that wraps your content with some built-in components to reduce the amount of code you need to write.
@@ -175,7 +182,7 @@ export class MyPageRenderStrategy implements PageRenderStrategy {
    * shouldRender can also return an Observable<boolean> which means
    * an async service can be used within.
 
-  constructor(private service: SomeAsyncService) {}
+  service = inject(SomeAsyncService)
 
   shouldRender(type: string) {
     return this.service.checkTypeAsync(type).pipe(map(val => val.isTrue()));

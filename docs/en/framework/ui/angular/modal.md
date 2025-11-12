@@ -1,3 +1,10 @@
+```json
+//[doc-seo]
+{
+    "Description": "Learn how to utilize the flexible `ModalComponent` from ABP Framework for customizable modals with seamless integration and user-friendly features."
+}
+```
+
 # Modal
 
 `ModalComponent` is a pre-built component exposed by `@abp/ng.theme.shared` package to show modals. The component uses the [`ng-bootstrap`](https://ng-bootstrap.github.io/)'s modal service inside to render a modal. 
@@ -132,12 +139,12 @@ See an example form inside a modal:
 
 import { Component } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
+import { inject } from '@angular/core';
 
 @Component(/* component metadata */)
 export class BookComponent {
   private fb = inject(FormBuilder);
   private service = inject(BookService);
- 
   form = this.fb.group({
     author: [null, [Validators.required]],
     name: [null, [Validators.required]],
@@ -147,7 +154,6 @@ export class BookComponent {
   });
 
   inProgress: boolean;
-
   isModalOpen: boolean;
 
   save() {

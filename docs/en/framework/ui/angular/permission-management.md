@@ -1,3 +1,10 @@
+```json
+//[doc-seo]
+{
+    "Description": "Learn how to manage user permissions in ABP Framework with practical examples and methods for effective authorization control."
+}
+```
+
 # Permission Management
 
 A permission is a simple policy that is granted or prohibited for a particular user, role or client. You can read more about [authorization in ABP](../../fundamentals/authorization.md) document.
@@ -8,9 +15,10 @@ You can get permission as boolean value:
 
 ```js
 import { PermissionService } from '@abp/ng.core';
+import { inject } from '@angular/core';
 
 export class YourComponent {
-  constructor(private permissionService: PermissionService) {}
+  private permissionService = inject(PermissionService);
 
   ngOnInit(): void {
     const canCreate = this.permissionService.getGrantedPolicy('AbpIdentity.Roles.Create');
@@ -83,14 +91,14 @@ In some cases, a custom permission management may be needed. All you need to do 
 
 ```js
 import { ConfigStateService, PermissionService } from '@abp/ng.core';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 
 @Injectable({
   providedIn: 'root',
 })
 export class CustomPermissionService extends PermissionService {
-  constructor(configStateService: ConfigStateService) {
-    super(configStateService);
+  constructor() {
+    super(inject(ConfigStateService));
   }
 
   // This is an example to show how to override the methods

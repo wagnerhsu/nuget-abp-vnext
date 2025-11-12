@@ -1,3 +1,10 @@
+```json
+//[doc-seo]
+{
+    "Description": "Learn how to establish a 1 to N relationship between Book and Author entities in your ABP Framework application with this step-by-step tutorial."
+}
+```
+
 # Web Application Development Tutorial - Part 10: Book to Author Relation
 ````json
 //[doc-params]
@@ -1009,12 +1016,12 @@ export class BookComponent implements OnInit {
 
   isModalOpen = false;
 
-  constructor(
-    public readonly list: ListService,
-    private bookService: BookService,
-    private fb: FormBuilder,
-    private confirmation: ConfirmationService
-  ) {
+  public readonly list = inject(ListService);
+  private readonly bookService = inject(BookService);
+  private readonly fb = inject(FormBuilder);
+  private readonly confirmation = inject(ConfirmationService);
+
+  constructor() {
     this.authors$ = bookService.getAuthorLookup().pipe(map((r) => r.items));
   }
 
