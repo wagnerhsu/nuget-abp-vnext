@@ -204,6 +204,7 @@ public abstract class AbpDbContext<TDbContext> : DbContext, IAbpEfCoreDbContext,
             case "Npgsql.EntityFrameworkCore.PostgreSQL":
                 return EfCoreDatabaseProvider.PostgreSql;
             case "Pomelo.EntityFrameworkCore.MySql":
+            case "MySql.Data.MySqlClient":
                 return EfCoreDatabaseProvider.MySql;
             case "Oracle.EntityFrameworkCore":
             case "Devart.Data.Oracle.Entity.EFCore":
@@ -309,7 +310,7 @@ public abstract class AbpDbContext<TDbContext> : DbContext, IAbpEfCoreDbContext,
                     EntityChangeEventHelper.PublishEntityUpdatedEvent(entityEntry.Entity);
                 }
             }
-            else if (entityEntry.Properties.Any(x => x.IsModified && (x.Metadata.ValueGenerated == ValueGenerated.Never || x.Metadata.ValueGenerated == ValueGenerated.OnAdd)))
+            else if (GetAllPropertyEntries(entityEntry).Any(x => x.IsModified && (x.Metadata.ValueGenerated == ValueGenerated.Never || x.Metadata.ValueGenerated == ValueGenerated.OnAdd)))
             {
                 if (IsOnlyForeignKeysModified(entityEntry))
                 {
@@ -445,7 +446,7 @@ public abstract class AbpDbContext<TDbContext> : DbContext, IAbpEfCoreDbContext,
                 break;
 
             case EntityState.Modified:
-                if (entry.Properties.Any(x => x.IsModified && (x.Metadata.ValueGenerated == ValueGenerated.Never || x.Metadata.ValueGenerated == ValueGenerated.OnAdd)))
+                if (GetAllPropertyEntries(entry).Any(x => x.IsModified && (x.Metadata.ValueGenerated == ValueGenerated.Never || x.Metadata.ValueGenerated == ValueGenerated.OnAdd)))
                 {
                     if (IsOnlyForeignKeysModified(entry))
                     {
@@ -453,7 +454,7 @@ public abstract class AbpDbContext<TDbContext> : DbContext, IAbpEfCoreDbContext,
                         break;
                     }
 
-                    var modifiedProperties = entry.Properties.Where(x => x.IsModified).ToList();
+                    var modifiedProperties = GetAllPropertyEntries(entry).Where(x => x.IsModified).ToList();
                     var disableAuditingAttributes = modifiedProperties.Select(x => x.Metadata.PropertyInfo?.GetCustomAttribute<DisableAuditingAttribute>()).ToList();
                     if (disableAuditingAttributes.Any(x => x == null || x.UpdateModificationProps))
                     {
@@ -500,9 +501,36 @@ public abstract class AbpDbContext<TDbContext> : DbContext, IAbpEfCoreDbContext,
         }
     }
 
+    protected virtual IEnumerable<PropertyEntry> GetAllPropertyEntries(EntityEntry entry)
+    {
+        return entry.Properties.Concat(GetAllComplexPropertyEntries(entry.ComplexProperties));
+    }
+
+    protected virtual IEnumerable<PropertyEntry> GetAllComplexPropertyEntries(IEnumerable<ComplexPropertyEntry> complexPropertyEntries)
+    {
+        foreach (var complexPropertyEntry in complexPropertyEntries)
+        {
+            var complexPropertyInfo = complexPropertyEntry.Metadata.PropertyInfo;
+            if (complexPropertyInfo != null && complexPropertyInfo.IsDefined(typeof(DisableAuditingAttribute), true))
+            {
+                continue;
+            }
+
+            foreach (var propertyEntry in complexPropertyEntry.Properties)
+            {
+                yield return propertyEntry;
+            }
+
+            foreach (var nestedPropertyEntry in GetAllComplexPropertyEntries(complexPropertyEntry.ComplexProperties))
+            {
+                yield return nestedPropertyEntry;
+            }
+        }
+    }
+
     protected virtual bool IsOnlyForeignKeysModified(EntityEntry entry)
     {
-        return entry.Properties.Where(x => x.IsModified).All(x => x.Metadata.IsForeignKey() &&
+        return GetAllPropertyEntries(entry).Where(x => x.IsModified).All(x => x.Metadata.IsForeignKey() &&
                                          (x.CurrentValue == null || x.OriginalValue?.ToString() == x.CurrentValue?.ToString()));
     }
 
@@ -661,7 +689,7 @@ public abstract class AbpDbContext<TDbContext> : DbContext, IAbpEfCoreDbContext,
     protected virtual void ApplyAbpConceptsForModifiedEntity(EntityEntry entry, bool forceApply = false)
     {
         if (forceApply ||
-            entry.Properties.Any(x => x.IsModified && (x.Metadata.ValueGenerated == ValueGenerated.Never || x.Metadata.ValueGenerated == ValueGenerated.OnAdd)))
+            GetAllPropertyEntries(entry).Any(x => x.IsModified && (x.Metadata.ValueGenerated == ValueGenerated.Never || x.Metadata.ValueGenerated == ValueGenerated.OnAdd)))
         {
             IncrementEntityVersionProperty(entry);
             SetModificationAuditProperties(entry);
@@ -685,6 +713,12 @@ public abstract class AbpDbContext<TDbContext> : DbContext, IAbpEfCoreDbContext,
             return;
         }
 
+        string? concurrencyStamp = null;
+        if (entry.Entity is IHasConcurrencyStamp hasConcurrencyStamp)
+        {
+            concurrencyStamp = hasConcurrencyStamp.ConcurrencyStamp;
+        }
+
         ExtraPropertyDictionary? originalExtraProperties = null;
         if (entry.Entity is IHasExtraProperties)
         {
@@ -692,6 +726,11 @@ public abstract class AbpDbContext<TDbContext> : DbContext, IAbpEfCoreDbContext,
         }
 
         entry.Reload();
+
+        if (concurrencyStamp != null && entry.Entity is IHasConcurrencyStamp)
+        {
+            ObjectHelper.TrySetProperty(entry.Entity.As<IHasConcurrencyStamp>(), x => x.ConcurrencyStamp, () => concurrencyStamp);
+        }
 
         if (entry.Entity is IHasExtraProperties)
         {

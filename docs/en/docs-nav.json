@@ -333,7 +333,7 @@
                   "path": "studio/solution-explorer.md"
                 },
                 {
-                  "text": "Running Applications",
+                  "text": "Solution Runner",
                   "path": "studio/running-applications.md"
                 },
                 {
@@ -347,6 +347,10 @@
                 {
                   "text": "Working with ABP Suite",
                   "path": "studio/working-with-suite.md"
+                },
+                {
+                  "text": "Custom Commands",
+                  "path": "studio/custom-commands.md"
                 }
               ]
             },
@@ -458,12 +462,16 @@
               "items": [
                 {
                   "text": "Overview",
-                  "path": "framework/fundamentals/authorization.md",
+                  "path": "framework/fundamentals/authorization/index.md",
                   "isIndex": true
                 },
                 {
                   "text": "Dynamic Claims",
                   "path": "framework/fundamentals/dynamic-claims.md"
+                },
+                {
+                  "text": "Resource Based Authorization",
+                  "path": "framework/fundamentals/authorization/resource-based-authorization.md"
                 }
               ]
             },
@@ -563,7 +571,11 @@
                 {
                   "text": "Microsoft.Extensions.AI",
                   "path": "framework/infrastructure/artificial-intelligence/microsoft-extensions-ai.md"
-                },                
+                },
+                {
+                  "text": "Agent Framework",
+                  "path": "framework/infrastructure/artificial-intelligence/microsoft-agent-framework.md"
+                },               
                 {
                   "text": "Semantic Kernel",
                   "path": "framework/infrastructure/artificial-intelligence/microsoft-semantic-kernel.md"
@@ -1280,7 +1292,7 @@
                     },
                     {
                       "text": "LeptonX Lite",
-                      "path": "ui-themes/lepton-x-lite/mvc.md"
+                      "path": "ui-themes/lepton-x-lite/asp-net-core.md"
                     },
                     {
                       "text": "LeptonX",
@@ -1558,6 +1570,14 @@
                       "path": "framework/ui/angular/service-proxies.md"
                     },
                     {
+                      "text": "SSR Configuration",
+                      "path": "framework/ui/angular/ssr-configuration.md"
+                    },
+                    {
+                      "text": "AI Tools Configuration",
+                      "path": "framework/ui/angular/ai-config.md"
+                    },
+                    {
                       "text": "PWA Configuration",
                       "path": "framework/ui/angular/pwa-configuration.md"
                     },
@@ -1641,7 +1661,7 @@
                       "path": "framework/ui/angular/list-service.md"
                     },
                     {
-                      "text": "Easy *ngFor trackBy",
+                      "text": "Easy @for() track",
                       "path": "framework/ui/angular/track-by-service.md"
                     },
                     {
@@ -1856,6 +1876,10 @@
                 {
                   "text": "Overriding the User Interface",
                   "path": "framework/architecture/modularity/extending/overriding-user-interface.md"
+                },
+                {
+                  "text": "How to Override LeptonX CSS Variables",
+                  "path": "framework/ui/common/leptonx-css-variables.md"
                 },
                 {
                   "text": "Utilities",
@@ -2291,6 +2315,10 @@
               "path": "solution-templates/microservice/helm-charts-and-kubernetes.md"
             },
             {
+              "text": ".NET Aspire Integration",
+              "path": "solution-templates/microservice/aspire-integration.md"
+            },
+            {
               "text": "Guides",
               "items": [
                 {
@@ -2352,12 +2380,16 @@
               "isIndex": true
             },
             {
+              "text": "Idle Session Timeout",
+              "path": "modules/account/idle-session-timeout.md"
+            },
+            {
               "text": "Tenant impersonation & User impersonation",
               "path": "modules/account/impersonation.md"
             },
             {
-              "text": "Idle Session Timeout",
-              "path": "modules/account/idle-session-timeout.md"
+              "text": "Web Authentication API (WebAuthn) passkeys",
+              "path": "modules/account/passkey.md"
             }
           ]
         },

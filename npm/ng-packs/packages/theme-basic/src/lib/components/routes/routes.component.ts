@@ -1,6 +1,6 @@
 import {
   ABP,
-  LazyLocalizationPipe,
+  AsyncLocalizationPipe,
   LocalizationPipe,
   PermissionDirective,
   RoutesService,
@@ -16,7 +16,7 @@ import {
   TrackByFunction,
   ViewChildren,
 } from '@angular/core';
-import { NgTemplateOutlet, NgClass, AsyncPipe } from '@angular/common';
+import { NgTemplateOutlet, AsyncPipe } from '@angular/common';
 import { NgbDropdownModule } from '@ng-bootstrap/ng-bootstrap';
 import { RouterLink } from '@angular/router';
 import { EllipsisDirective } from '@abp/ng.theme.shared';
@@ -26,11 +26,10 @@ import { EllipsisDirective } from '@abp/ng.theme.shared';
   templateUrl: 'routes.component.html',
   imports: [
     NgTemplateOutlet,
-    NgClass,
     AsyncPipe,
     RouterLink,
     NgbDropdownModule,
-    LazyLocalizationPipe,
+    AsyncLocalizationPipe,
     PermissionDirective,
     EllipsisDirective,
     LocalizationPipe,

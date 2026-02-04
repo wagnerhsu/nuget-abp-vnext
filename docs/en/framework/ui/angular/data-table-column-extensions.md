@@ -171,7 +171,7 @@ It has the following properties:
 
 - **index** is the table index where the record is at.
 
-- **getInjected** is the equivalent of [Injector.get](https://angular.io/api/core/Injector#get). You can use it to reach injected dependencies of `ExtensibleTableComponent`, including, but not limited to, its parent component.
+- **getInjected** is the equivalent of [Injector.get](https://angular.dev/api/core/Injector). You can use it to reach injected dependencies of `ExtensibleTableComponent`, including, but not limited to, its parent component.
 
   ```js
   {
@@ -342,4 +342,5 @@ export const identityEntityPropContributors = {
 
 ## See Also
 
+- [Extensible Table Row Detail](extensible-table-row-detail.md)
 - [Customizing Application Modules Guide](../../architecture/modularity/extending/customizing-application-modules-guide.md)

@@ -21,8 +21,8 @@ In this quick start guide, you will learn how to create and run a single layer w
 
 First things first! Let's setup your development environment before creating the first project. The following tools should be installed on your development machine:
 
-* [Visual Studio 2022](https://visualstudio.microsoft.com/) or another IDE that supports [.NET 9.0+](https://dotnet.microsoft.com/download/dotnet) development.
-* [.NET 9.0+](https://dotnet.microsoft.com/en-us/download/dotnet){{ if UI != "Blazor" }}
+* [Visual Studio 2026](https://visualstudio.microsoft.com/) or another IDE that supports [.NET 10.0+](https://dotnet.microsoft.com/download/dotnet) development.
+* [.NET 10.0+](https://dotnet.microsoft.com/en-us/download/dotnet){{ if UI != "Blazor" }}
 * [Node v22.11+](https://nodejs.org/){{ end }}{{ if UI == "NG" }}
 * [Yarn v1.22+ (not v2+)](https://classic.yarnpkg.com/en/docs/install) or npm v10+ (already installed with Node){{ end }}
 
@@ -66,7 +66,7 @@ Once your configuration is done, click the *Next* button to navigate to the *UI 
 
 Here, you see all the possible UI options supported by that startup solution template. Pick the **{{ UI_Value }}**. 
 
-Notice that; Once you select a UI type, some additional options will be available under the UI Framework list. You can further configure the options or leave them as default and click the Next button for the *Database Provider* selection screen:
+Notice that: Once you select a UI type, some additional options will be available under the UI Framework list. You can further configure the options or leave them as default and click the Next button for the *Database Provider* selection screen:
 
 {{ if DB == "EF" }}
 ![abp-studio-new-solution-dialog-database-provider](images/abp-studio-no-layers-new-solution-dialog-database-provider-efcore_dark.png)
@@ -110,7 +110,7 @@ In this step, you can choose which languages your application will support.
 
 * Click Add Custom Language if you want to add a language that is not listed.
 
-You can change these settings later if needed. Thenk click the *Next* button for the *Additional Options* page:
+You can change these settings later if needed. Then click the *Next* button for the *Additional Options* page:
 
 ![abp-studio-no-layers-new-solution-additional-options](images/abp-studio-no-layers-new-solution-additional-options_dark.png)
 
@@ -185,3 +185,7 @@ You can then hit *F5* or *Ctrl + F5* to run the web application. It will run and
 ![bookstore-browser-users-page](images/no-layers-bookstore-browser-users-page_dark.png)
 
 You can use `admin` as username and `1q2w3E*` as default password to login to the application.
+
+## What's next?
+
+- [TODO Application Tutorial with Single-Layer Solution](../tutorials/todo/single-layer/index.md)
