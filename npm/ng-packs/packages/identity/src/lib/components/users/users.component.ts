@@ -39,7 +39,7 @@ import {
   OnInit,
   TemplateRef,
   TrackByFunction,
-  ViewChild,
+  viewChild
 } from '@angular/core';
 import {
   AbstractControl,
@@ -52,8 +52,7 @@ import {
 import { finalize, switchMap, tap } from 'rxjs/operators';
 import { eIdentityComponents } from '../../enums/components';
 import { PageComponent } from '@abp/ng.components/page';
-import { NgbDropdownModule } from '@ng-bootstrap/ng-bootstrap';
-import { Tabs, TabList, Tab, TabPanel, TabContent } from '@angular/aria/tabs';
+import { NgbDropdownModule, NgbNavModule } from '@ng-bootstrap/ng-bootstrap';
 import { NgxValidateCoreModule } from '@ngx-validate/core';
 
 @Component({
@@ -71,12 +70,8 @@ import { NgxValidateCoreModule } from '@ngx-validate/core';
     FormsModule,
     PermissionManagementComponent,
     PageComponent,
-    Tabs,
-    TabList,
-    Tab,
-    TabPanel,
-    TabContent,
     NgbDropdownModule,
+    NgbNavModule,
     NgxValidateCoreModule,
     LocalizationPipe,
     ExtensibleTableComponent,
@@ -99,8 +94,7 @@ export class UsersComponent implements OnInit {
 
   data: PagedResultDto<IdentityUserDto> = { items: [], totalCount: 0 };
 
-  @ViewChild('modalContent', { static: false })
-  modalContent!: TemplateRef<any>;
+  readonly modalContent = viewChild.required<TemplateRef<any>>('modalContent');
 
   form!: UntypedFormGroup;
 
